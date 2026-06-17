@@ -1,3 +1,4 @@
+import 'package:cw_fashion/features/all_products/presentation/pages/all_products_page.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -79,7 +80,15 @@ class SideMenuDrawer extends StatelessWidget {
 
                         menuItem("Home", () {}),
 
-                        menuItem("All Products", () {}),
+                        menuItem("All Products", () {
+                          Navigator.pop(context);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const AllProductsPage(),
+                            ),
+                          );
+                        }),
 
                         menuItem("Wishlist", () {}),
 

@@ -32,33 +32,34 @@ class TrendingSection extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 15,),
-          Row(
-            children: const [
-
-              Expanded(
-                child: ProductCard(
-                  image:
-                  "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f",
-                  title: "Men Jeans",
-                  price: "₹500",
-                  oldPrice: "₹1,100",
-                  sold: "24+ sold",
+          SizedBox(
+            height: 380,
+            child: Row(
+              children: const [
+                Expanded(
+                  child: ProductCard(
+                    image:
+                    "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f",
+                    title: "Men Jeans",
+                    price: "₹500",
+                    oldPrice: "₹1,100",
+                    sold: "24+ sold",
+                  ),
                 ),
-              ),
 
-              SizedBox(width: 15),
+                SizedBox(width: 15),
 
-              Expanded(
-                child: ProductCard(
-                  image:
-                  "https://images.unsplash.com/photo-1529139574466-a303027c1d8b",
-                  title: "Women Top",
-                  price: "₹900",
-                  oldPrice: "",
-                  sold: "15+ sold",
+                Expanded(
+                  child: ProductCard(
+                    image:
+                    "https://images.unsplash.com/photo-1529139574466-a303027c1d8b",
+                    title: "Women Top",
+                    price: "₹900",
+                    sold: "15+ sold",
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ],
       ),
