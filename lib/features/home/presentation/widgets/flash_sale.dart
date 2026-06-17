@@ -1,4 +1,6 @@
+import 'package:cw_fashion/features/home/presentation/bloc/home_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'product_card.dart';
 
 class FlashSaleSection extends StatelessWidget {
@@ -6,98 +8,99 @@ class FlashSaleSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: const Color(0xffF9ECEC),
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        crossAxisAlignment:
-        CrossAxisAlignment.start,
-        children: [
-
-          const Text(
-            "FLASH SALE",
-            style: TextStyle(
-              color: Colors.red,
-              letterSpacing: 4,
-                fontWeight: FontWeight.bold
-            ),
-          ),
-
-          const Text(
-            "Limited Time Offers",
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-
-          const SizedBox(height: 10),
-
-          Row(
+    return Consumer<HomeProvider>(
+      builder: (context, provider, child) {
+        return Container(
+          color: const Color(0xffF9ECEC),
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-
-              _timer("340","Hrs"),
-              _timer("43","Min"),
-              _timer("39","Sec"),
-
-              const Spacer(),
-
               const Text(
-                "View All →",
+                "FLASH SALE",
                 style: TextStyle(
                   color: Colors.red,
-                  fontSize: 16,
+                  letterSpacing: 4,
+                  fontWeight: FontWeight.bold,
                 ),
-              )
+              ),
+
+              const Text(
+                "Limited Time Offers",
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              ),
+
+              const SizedBox(height: 10),
+
+              Row(
+                children: [
+                  _timerBox(provider.hours, "Hrs"),
+
+                  _timerBox(provider.minutes, "Min"),
+
+                  _timerBox(provider.seconds, "Sec"),
+
+                  const Spacer(),
+
+                  const Text(
+                    "View All →",
+                    style: TextStyle(color: Colors.red, fontSize: 16),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 15),
+
+              if (provider.flashSaleIsLoading)
+                const SizedBox(
+                  height: 250,
+                  child: Center(child: CircularProgressIndicator()),
+                )
+              else if (provider.flashSaleProducts.isEmpty)
+                const SizedBox(
+                  height: 100,
+                  child: Center(child: Text("No Flash Sale Products")),
+                )
+              else
+                GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: provider.flashSaleProducts.length,
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 15,
+                    mainAxisSpacing: 15,
+                    childAspectRatio: 0.55,
+                  ),
+                  itemBuilder: (_, index) {
+                    final product = provider.flashSaleProducts[index];
+
+                    return ProductCard(
+                      title: product.title,
+                      image: product.imageUrl,
+                      price: "₹${product.flashSalePrice.toInt()}",
+                      oldPrice: "₹${product.mrp.toInt()}",
+                      sold: "${product.totalSold}+ sold",
+                      rating: product.rating,
+                      discount: product.discountPercent,
+                      showSaleBadge: true,
+                    );
+                  },
+                ),
             ],
           ),
-
-          const SizedBox(height: 15),
-
-          Row(
-            children: const [
-
-              Expanded(
-                child: ProductCard(
-                  title: "Men Jeans",
-                  price: "₹500",
-                  oldPrice: "₹1,100",
-                  sold: "24+ sold",
-                  image:
-                  "https://picsum.photos/400/600",
-                ),
-              ),
-
-              SizedBox(width: 15),
-
-              Expanded(
-                child: ProductCard(
-                  title: "Women Top",
-                  price: "₹900",
-                  oldPrice: "",
-                  sold: "15+ sold",
-                  image:
-                  "https://picsum.photos/401/600",
-                ),
-              ),
-            ],
-          )
-        ],
-      ),
+        );
+      },
     );
   }
 
-  Widget _timer(
-      String value,
-      String label,
-      ) {
+  Widget _timerBox(String value, String label) {
     return Container(
       margin: const EdgeInsets.only(right: 10),
-      padding: const EdgeInsets.all(10),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
         color: Colors.red,
-        borderRadius:
-        BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
         children: [
@@ -105,16 +108,13 @@ class FlashSaleSection extends StatelessWidget {
             value,
             style: const TextStyle(
               color: Colors.white,
-              fontWeight:
-              FontWeight.bold,
+              fontWeight: FontWeight.bold,
             ),
           ),
           Text(
             label,
-            style: const TextStyle(
-              color: Colors.white,
-            ),
-          )
+            style: const TextStyle(color: Colors.white, fontSize: 12),
+          ),
         ],
       ),
     );

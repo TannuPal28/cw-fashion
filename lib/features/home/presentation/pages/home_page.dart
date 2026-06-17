@@ -2,7 +2,9 @@ import 'package:cw_fashion/features/home/presentation/widgets/custom_header.dart
 import 'package:cw_fashion/features/home/presentation/widgets/flash_sale.dart';
 import 'package:cw_fashion/features/home/presentation/widgets/top_brands.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
+import '../bloc/home_provider.dart';
 import '../widgets/banner_section.dart';
 import '../widgets/category_section.dart';
 import '../widgets/offer_banner.dart';
@@ -15,42 +17,87 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
-            children: const [
+      body: Consumer<HomeProvider>(
+        builder: (context, provider, child) {
+          return SafeArea(
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  const CustomHeader(),
 
-              CustomHeader(),
+                  const SizedBox(height: 10),
 
-              SizedBox(height: 10),
+                  const BannerSection(),
 
-              BannerSection(),
+                  const SizedBox(height: 20),
 
-              SizedBox(height: 20),
+                  const FlashSaleSection(),
 
-              FlashSaleSection(),
+                  const SizedBox(height: 20),
+                  const CategorySection(),
 
-              SizedBox(height: 20),
-              CategorySection(),
+                  const SizedBox(height: 20),
+                  provider.featuresIsLoading
+                      ? const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(20),
+                      child: CircularProgressIndicator(),
+                    ),
+                  )
+                      : TrendingSection(
+                    title: "Featured Products",
+                    products: provider.features,
+                  ),
+                  const SizedBox(height: 20),
 
-              SizedBox(height: 20),
+                  provider.trendingIsLoading
+                      ? const Center(
+                          child: Padding(
+                            padding: EdgeInsets.all(20),
+                            child: CircularProgressIndicator(),
+                          ),
+                        )
+                      : TrendingSection(
+                          title: "Trending Now",
+                          products: provider.trending,
+                        ),
 
-              TrendingSection(title: "Trending Now",),
+                  const SizedBox(height: 20),
 
-              SizedBox(height: 20),
+                  const OfferBanner(),
 
-              OfferBanner(),
-
-              SizedBox(height: 20),
-              TrendingSection(title: "Best Seller",),
-              SizedBox(height: 20),
-              TrendingSection(title: "New Arrivals",),
-              SizedBox(height: 20),
-              TopBrands(),
-              SizedBox(height: 20,),
-            ],
-          ),
-        ),
+                  const SizedBox(height: 20),
+                  provider.bestSellerIsLoading
+                      ? const Center(
+                          child: Padding(
+                            padding: EdgeInsets.all(20),
+                            child: CircularProgressIndicator(),
+                          ),
+                        )
+                      : TrendingSection(
+                          title: "Best Seller",
+                          products: provider.bestSellers,
+                        ),
+                  const SizedBox(height: 20),
+                  provider.newArrivalIsLoading
+                      ? const Center(
+                          child: Padding(
+                            padding: EdgeInsets.all(20),
+                            child: CircularProgressIndicator(),
+                          ),
+                        )
+                      : TrendingSection(
+                          title: "New Arrivals",
+                          products: provider.newArrivals,
+                        ),
+                  const SizedBox(height: 20),
+                  const TopBrands(),
+                  const SizedBox(height: 20),
+                ],
+              ),
+            ),
+          );
+        },
       ),
     );
   }

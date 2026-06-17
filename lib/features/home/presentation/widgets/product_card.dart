@@ -31,31 +31,34 @@ class ProductCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.white,
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-
           /// IMAGE
-          AspectRatio(
-            aspectRatio: 0.75,
+          SizedBox(
+            height: 180,
+            width: double.infinity,
+
             child: Stack(
               children: [
                 Container(
                   width: double.infinity,
                   decoration: BoxDecoration(
-                    border: Border.all(
-                      color: Colors.grey.shade300,
-                    ),
+                    border: Border.all(color: Colors.grey.shade300),
                   ),
                   child: isValidImage
                       ? Image.network(
-                    image,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) {
-                      return const Icon(Icons.image, size: 50);
-                    },
-                  )
+                          image,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) {
+                            return const Icon(Icons.image, size: 50);
+                          },
+                        )
                       : const Icon(Icons.image, size: 50),
                 ),
 
@@ -91,10 +94,7 @@ class ProductCard extends StatelessWidget {
                       color: Colors.red,
                       child: const Text(
                         "SALE",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
-                        ),
+                        style: TextStyle(color: Colors.white, fontSize: 12),
                       ),
                     ),
                   ),
@@ -109,10 +109,7 @@ class ProductCard extends StatelessWidget {
             title,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-            ),
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
           ),
 
           const SizedBox(height: 4),
@@ -150,16 +147,9 @@ class ProductCard extends StatelessWidget {
             Row(
               children: [
                 if (rating != null) ...[
-                  const Icon(
-                    Icons.star,
-                    color: Colors.amber,
-                    size: 14,
-                  ),
+                  const Icon(Icons.star, color: Colors.amber, size: 14),
                   const SizedBox(width: 2),
-                  Text(
-                    rating.toString(),
-                    style: const TextStyle(fontSize: 12),
-                  ),
+                  Text(rating.toString(), style: const TextStyle(fontSize: 12)),
                 ],
 
                 const Spacer(),
