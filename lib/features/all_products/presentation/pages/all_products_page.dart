@@ -1,151 +1,274 @@
 import 'package:cw_fashion/features/home/presentation/widgets/custom_header.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart';
+import 'package:provider/provider.dart';
 
 import '../../../home/presentation/widgets/product_card.dart';
+import '../bloc/search_provider.dart';
+import '../widgets/filter_drawer.dart';
 
-class AllProductsPage extends StatelessWidget {
-  const AllProductsPage({super.key});
+class AllProductsPage extends StatefulWidget {
+  final String query;
+
+  const AllProductsPage({super.key, required this.query});
+
+  @override
+  State<AllProductsPage> createState() => _AllProductsPageState();
+}
+
+class _AllProductsPageState extends State<AllProductsPage> {
+  late ScrollController _scrollController;
+  String selectedSort = "Sort by : Newest";
+  final Map<String, String> sortMap = {
+    "Sort by: Newest": "newest",
+    "Price: Low to High": "price_asc",
+    "Price: High to Low": "price_desc",
+    "Top Rated": "rating_desc",
+    "Best Selling": "best_selling",
+  };
+
+  @override
+  void initState() {
+    super.initState();
+
+    _scrollController = ScrollController();
+
+    Future.microtask(() {
+      context.read<SearchProvider>().search(widget.query);
+    });
+
+    _scrollController.addListener(_pagination);
+  }
+
+  void _pagination() {
+    final provider = context.read<SearchProvider>();
+
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
+      provider.loadMore();
+    }
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xfff5f5f5),
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              const CustomHeader(),
-              Padding(
-                padding: const EdgeInsets.all(20),
+        child: Consumer<SearchProvider>(
+          builder: (_, provider, __) {
+            if (provider.isLoading) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            if (provider.isEmpty) {
+              return const Center(child: Text("No Products Found"));
+            }
+
+            return RefreshIndicator(
+              onRefresh: provider.refresh,
+              child: SingleChildScrollView(
+                controller: _scrollController,
+
+                physics: const AlwaysScrollableScrollPhysics(),
                 child: Column(
                   children: [
-                    //filter or title
-                    Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 20,
-                            vertical: 18,
-                          ),
-                          child: const Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(Icons.tune,size:20),
-                              SizedBox(width:10),
-                              Text("Filters"),
-                            ],
-                          ),
-                        ),
-
-                        const SizedBox(width: 10),
-
-                        Expanded(
-                          child: Row(
-                            children: const [
-                              Flexible(
-                                child: Text(
-                                  "All Products",
-                                  overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(
-                                    fontSize:18,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                              ),
-                              SizedBox(width: 4),
-                              Text(
-                                "(10 items)",
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.grey,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 25),
-                    //sort dropdown ui
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 18,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        border: Border.all(color: const Color(0xffdddddd)),
-                      ),
-                      child: const Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    const CustomHeader(),
+                    Padding(
+                      padding: const EdgeInsets.all(15),
+                      child: Column(
                         children: [
-                          Text(
-                            "Sort by: Newest",
-                            style: TextStyle(fontSize: 18),
-                          ),
-                          Icon(Icons.keyboard_arrow_down),
+                          _title(provider),
+
+                          _sort(),
+
+                          const SizedBox(height: 15),
+
+                          _products(provider),
+
+                          if (provider.isLoadMore)
+                            const Padding(
+                              padding: EdgeInsets.all(10),
+                              child: CircularProgressIndicator(),
+                            ),
                         ],
                       ),
-                    ),
-                    const SizedBox(height: 25),
-                    //products
-                    GridView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: demoProducts.length,
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2,
-                            crossAxisSpacing: 16,
-                            mainAxisSpacing: 20,
-                            childAspectRatio: .47,
-                          ),
-                      itemBuilder: (context, index) {
-                        return ProductCard(
-                          image: demoProducts[index]["image"],
-                          title: demoProducts[index]["title"],
-                          price: demoProducts[index]["price"],
-                          oldPrice: demoProducts[index]["oldPrice"],
-                          rating: demoProducts[index]["rating"],
-                          reviews: demoProducts[index]["reviews"],
-                          sold: demoProducts[index]["sold"],
-                          discount: demoProducts[index]["discount"],
-                        );
-                      },
                     ),
                   ],
                 ),
               ),
-            ],
-          ),
+            );
+          },
         ),
       ),
     );
   }
-}
 
-final List<Map<String, dynamic>> demoProducts = [
-  {
-    "image":
-    "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f",
-    "title": "Women's Yoga Top",
-    "price": "₹1,499",
-    "oldPrice": "₹2,499",
-    "rating": 4.3,
-    "reviews": 118,
-    "sold": "276+ sold",
-    "discount": "-40%",
-  },
-  {
-    "image":
-    "https://images.unsplash.com/photo-1523170335258-f5ed11844a49",
-    "title": "Classic Analog Watch",
-    "price": "₹2,999",
-    "oldPrice": "₹5,299",
-    "rating": 4.0,
-    "reviews": 48,
-    "sold": "134+ sold",
-    "discount": "-43%",
-  },
-];
+  Widget _title(SearchProvider provider) {
+    return Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+
+          child: InkWell(
+            onTap: () {
+              _openFilterDrawer();
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 20,
+                vertical: 18,
+              ),
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.tune, size: 20),
+                  SizedBox(width: 10),
+                  Text("Filters"),
+                ],
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Row(
+            children: [
+              const Flexible(
+                child: Text(
+                  "All Products",
+
+                  overflow: TextOverflow.ellipsis,
+
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                ),
+              ),
+
+              const SizedBox(width: 5),
+
+              Text(
+                "(${provider.totalProducts})",
+
+                style: const TextStyle(color: Colors.grey),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _sort() {
+    return Container(
+      width: double.infinity,
+
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+
+      decoration: BoxDecoration(
+        color: Colors.white,
+
+        border: Border.all(color: const Color(0xffdddddd)),
+      ),
+
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          isExpanded: true,
+          value: selectedSort,
+          icon: const Icon(Icons.keyboard_arrow_down),
+          items: sortMap.keys.map((item) {
+            return DropdownMenuItem<String>(
+              value: item,
+              child: Text(item, style: const TextStyle(fontSize: 16)),
+            );
+          }).toList(),
+          onChanged: (value) async {
+            if (value == null) return;
+            setState(() {
+              selectedSort = value;
+            });
+
+            await context.read()<SearchProvider>().search(
+              widget.query,
+              sort: sortMap[value],
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _products(SearchProvider provider) {
+    return GridView.builder(
+      shrinkWrap: true,
+
+      physics: const NeverScrollableScrollPhysics(),
+
+      itemCount: provider.products.length,
+
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+
+        crossAxisSpacing: 16,
+
+        mainAxisSpacing: 20,
+
+        childAspectRatio: .47,
+      ),
+
+      itemBuilder: (_, index) {
+        final product = provider.products[index];
+
+        int discount = 0;
+
+        if (product.mrp > 0) {
+          discount =
+              (((product.mrp - product.flashSalePrice) / product.mrp) * 100)
+                  .round();
+        }
+
+        return ProductCard(
+          image: product.images.isNotEmpty ? product.images.first.url : "",
+
+          title: product.title,
+
+          price: "₹${product.flashSalePrice}",
+
+          oldPrice: "₹${product.mrp}",
+
+          rating: product.rating,
+
+          reviews: product.numRatings,
+
+          sold: "${product.totalSold}+ sold",
+
+          discount: "-$discount%",
+        );
+      },
+    );
+  }
+  void _openFilterDrawer() {
+    showGeneralDialog(
+      context: context,
+      barrierDismissible: true,
+      barrierLabel: "",
+      transitionDuration: const Duration(milliseconds: 300),
+      pageBuilder: (_, __, ___) {
+        return const FilterDrawer();
+      },
+      transitionBuilder: (context, animation, secondaryAnimation, child) {
+        return SlideTransition(
+          position: Tween<Offset>(
+            begin: const Offset(-1, 0),
+            end: Offset.zero,
+          ).animate(animation),
+          child: child,
+        );
+      },
+    );
+  }
+}

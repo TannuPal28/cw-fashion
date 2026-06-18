@@ -1,8 +1,12 @@
 import 'package:cw_fashion/core/network/dio_client.dart';
+import 'package:cw_fashion/features/all_products/data/datasources/search_remote_datasource.dart';
+import 'package:cw_fashion/features/all_products/data/repositories/search_repository.dart';
+import 'package:cw_fashion/features/all_products/presentation/bloc/search_provider.dart';
 import 'package:cw_fashion/features/home/data/datasources/home_remote_datasource.dart';
 import 'package:cw_fashion/features/home/data/repositories/home_repository.dart';
 import 'package:cw_fashion/features/home/presentation/bloc/home_provider.dart';
 import 'package:cw_fashion/features/home/presentation/pages/home_page.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -29,6 +33,11 @@ class MyApp extends StatelessWidget {
                 ..getBestSellers()
                 ..getNewArrivals()
                 ..getFeatures(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => SearchProvider(
+            SearchRepository(SearchRemoteDatasource(DioClient())),
+          ),
         ),
       ],
       child: MaterialApp(

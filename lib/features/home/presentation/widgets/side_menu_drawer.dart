@@ -85,7 +85,7 @@ class SideMenuDrawer extends StatelessWidget {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (_) => const AllProductsPage(),
+                              builder: (_) => AllProductsPage(query: ''),
                             ),
                           );
                         }),
