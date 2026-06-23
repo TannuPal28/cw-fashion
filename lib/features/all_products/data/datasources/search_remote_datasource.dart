@@ -12,23 +12,35 @@ class SearchRemoteDatasource {
     required int page,
     required int limit,
     required String query,
-    String? sort
+    String? sort,
+    String? category,
+    String? brand,
+    String? minPrice,
+    String? maxPrice,
   }) async {
-    final Map<String, dynamic> params = {
-      "page": page,
-      "limit": limit,
-      "q": query,
-    };
-
+    final Map<String, dynamic> params = {"page": page, "limit": limit};
+    if (query.isNotEmpty) {
+      params["q"] = query;
+    }
     if (sort != null && sort.isNotEmpty) {
       params["sort"] = sort;
     }
-
+    if (category != null && category.isNotEmpty) {
+      params["category"] = category;
+    }
+    if (brand != null && brand.isNotEmpty) {
+      params["brand"] = brand;
+    }
+    if (minPrice != null && minPrice.isNotEmpty) {
+      params["minPrice"] = minPrice;
+    }
+    if (maxPrice != null && maxPrice.isNotEmpty) {
+      params["maxPrice"] = maxPrice;
+    }
     final response = await dioClient.get(
       ApiConstants.search,
       queryParameters: params,
     );
-
     return SearchResponseModel.fromJson(response.data);
   }
 }

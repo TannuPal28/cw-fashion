@@ -3,6 +3,7 @@ import 'package:cw_fashion/features/home/presentation/widgets/side_menu_drawer.d
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+import '../../../../core/utils/auth_manager.dart';
 import '../../../all_products/presentation/pages/all_products_page.dart';
 
 class CustomHeader extends StatefulWidget {
@@ -14,6 +15,7 @@ class CustomHeader extends StatefulWidget {
 
 class _CustomHeaderState extends State<CustomHeader> {
   bool isSearching = false;
+  bool isLoggedIn = false;
   final TextEditingController searchController = TextEditingController();
 
   @override
@@ -22,6 +24,16 @@ class _CustomHeaderState extends State<CustomHeader> {
     super.dispose();
   }
 
+  @override
+  void initState() {
+    super.initState();
+    loadToken();
+  }
+
+  Future<void> loadToken() async {
+    isLoggedIn = await AuthManager.isLoggedIn();
+    setState(() {});
+  }
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -107,6 +119,8 @@ class _CustomHeaderState extends State<CustomHeader> {
           const Icon(Icons.shopping_bag_outlined),
 
           const SizedBox(width: 15),
+
+          if(!isLoggedIn)
 
           GestureDetector(
             onTap: () {

@@ -4,6 +4,7 @@ import 'package:cw_fashion/features/home/presentation/widgets/top_brands.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../../core/utils/auth_manager.dart';
 import '../bloc/home_provider.dart';
 import '../widgets/banner_section.dart';
 import '../widgets/category_section.dart';

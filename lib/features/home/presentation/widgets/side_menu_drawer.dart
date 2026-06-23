@@ -1,12 +1,32 @@
 import 'package:cw_fashion/features/all_products/presentation/pages/all_products_page.dart';
+import 'package:cw_fashion/features/home/presentation/pages/home_page.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+import '../../../../core/utils/auth_manager.dart';
 import '../../../auth/presentation/pages/sign_in_page.dart';
 import '../../../auth/presentation/pages/sign_up_page.dart';
 
-class SideMenuDrawer extends StatelessWidget {
+class SideMenuDrawer extends StatefulWidget {
   const SideMenuDrawer({super.key});
+
+  @override
+  State<SideMenuDrawer> createState() => _SideMenuDrawerState();
+}
+
+class _SideMenuDrawerState extends State<SideMenuDrawer> {
+  bool isLoggedIn = false;
+
+  @override
+  void initState() {
+    super.initState();
+    loadToken();
+  }
+
+  Future<void> loadToken() async {
+    isLoggedIn = await AuthManager.isLoggedIn();
+    setState(() {});
+  }
 
   Widget menuItem(String title, VoidCallback onTap) {
     return InkWell(
@@ -71,14 +91,20 @@ class SideMenuDrawer extends StatelessWidget {
                   ),
                 ),
                 Expanded(
-                  child: Padding(
+                  child: SingleChildScrollView(
                     padding: const EdgeInsets.symmetric(horizontal: 24),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const SizedBox(height: 30),
 
-                        menuItem("Home", () {}),
+                        menuItem("Home", () {
+                          Navigator.pop(context);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => HomePage()),
+                          );
+                        }),
 
                         menuItem("All Products", () {
                           Navigator.pop(context);
@@ -96,27 +122,55 @@ class SideMenuDrawer extends StatelessWidget {
 
                         const Divider(),
 
-                        menuItem("Sign In", () {
-                          Navigator.pop(context); // drawer close
+                        if (!isLoggedIn) ...[
+                          menuItem("Sign In", () {
+                            Navigator.pop(context);
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const SignInPage(),
+                              ),
+                            );
+                          }),
 
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const SignInPage(),
-                            ),
-                          );
-                        }),
+                          menuItem("Create Account", () {
+                            Navigator.pop(context);
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const SignUpPage(),
+                              ),
+                            );
+                          }),
+                        ] else ...[
+                          menuItem("Profile", () {}),
 
-                        menuItem("Create Account", () {
-                          Navigator.pop(context); // drawer close
+                          menuItem("Orders", () {}),
 
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const SignUpPage(),
-                            ),
-                          );
-                        }),
+                          menuItem("My Reviews", () {}),
+
+                          menuItem("Wallet", () {}),
+
+                          menuItem("Refer & Earn", () {}),
+
+                          menuItem("Help Center", () {}),
+
+                          const Divider(),
+
+                          menuItem("Logout", () async {
+                            await AuthManager.logout();
+
+                            if (!mounted) return;
+
+                            setState(() {
+                              isLoggedIn = false;
+                            });
+
+                            Navigator.pop(context);
+                          }),
+                        ],
+
+                        const SizedBox(height: 20),
                       ],
                     ),
                   ),

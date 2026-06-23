@@ -21,13 +21,27 @@ class SearchProvider extends ChangeNotifier {
   String currentQuery = "";
   String? currentSort;
 
-  Future<void> search(String query, {String? sort}) async {
-    currentQuery = query;
-    if (sort != null) {
-      currentSort = sort;
-    }
+  String? selectedCategory;
+  String? selectedBrand;
+  String? minPrice;
+  String? maxPrice;
 
-    currentSort = sort;
+  Future<void> search(
+    String query, {
+    String? sort,
+    String? category,
+    String? brand,
+    String? minPrice,
+    String? maxPrice,
+  }) async {
+    currentQuery = query;
+
+    if (sort != null) currentSort = sort;
+    if (category != null) selectedCategory = category;
+    if (brand != null) selectedBrand = brand;
+    if (minPrice != null) this.minPrice = minPrice;
+    if (maxPrice != null) this.maxPrice = maxPrice;
+
     currentPage = 1;
     totalPages = 1;
     products.clear();
@@ -40,18 +54,23 @@ class SearchProvider extends ChangeNotifier {
       final response = await searchRepository.search(
         page: currentPage,
         limit: limit,
-        query: query,
-        sort: currentSort
+        query: currentQuery,
+        sort: currentSort,
+        category: selectedCategory,
+        brand: selectedBrand,
+        minPrice: this.minPrice,
+        maxPrice: this.maxPrice,
       );
+
       products = response.products;
       filters = response.filters;
       pagination = response.pagination;
-
       totalPages = response.pagination.totalPages;
     } catch (e) {
       hasError = true;
-      debugPrint("Search error : $e");
+      debugPrint("Search error: $e");
     }
+
     isLoading = false;
     notifyListeners();
   }
@@ -68,7 +87,11 @@ class SearchProvider extends ChangeNotifier {
         page: currentPage,
         limit: limit,
         query: currentQuery,
-        sort: currentSort
+        sort: currentSort,
+        category: selectedCategory,
+        brand: selectedBrand,
+        minPrice: minPrice,
+        maxPrice: maxPrice,
       );
       products.addAll(response.products);
 
@@ -87,7 +110,23 @@ class SearchProvider extends ChangeNotifier {
 
   //pull to refresh
   Future<void> refresh() async {
-    await search(currentQuery,sort: currentSort);
+    await search(
+      currentQuery,
+      sort: currentSort,
+      category: selectedCategory,
+      brand: selectedBrand,
+      minPrice: minPrice,
+      maxPrice: maxPrice,
+    );
+  }
+
+  void clearFilters() {
+    currentSort = null;
+    selectedCategory = null;
+    selectedBrand = null;
+    minPrice = null;
+    maxPrice = null;
+    notifyListeners();
   }
 
   /// Clear Search
@@ -100,6 +139,11 @@ class SearchProvider extends ChangeNotifier {
     currentPage = 1;
     totalPages = 1;
     currentQuery = "";
+    currentSort = null;
+    selectedCategory = null;
+    selectedBrand = null;
+    minPrice = null;
+    maxPrice = null;
 
     isLoading = false;
     isLoadMore = false;

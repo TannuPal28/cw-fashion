@@ -18,7 +18,7 @@ class AllProductsPage extends StatefulWidget {
 
 class _AllProductsPageState extends State<AllProductsPage> {
   late ScrollController _scrollController;
-  String selectedSort = "Sort by : Newest";
+  String selectedSort = "Sort by: Newest";
   final Map<String, String> sortMap = {
     "Sort by: Newest": "newest",
     "Price: Low to High": "price_asc",
@@ -26,10 +26,14 @@ class _AllProductsPageState extends State<AllProductsPage> {
     "Top Rated": "rating_desc",
     "Best Selling": "best_selling",
   };
+  late final Map<String, String> reverseSortMap;
 
   @override
   void initState() {
     super.initState();
+    reverseSortMap = {
+      for (var e in sortMap.entries) e.value: e.key,
+    };
 
     _scrollController = ScrollController();
 
@@ -62,6 +66,10 @@ class _AllProductsPageState extends State<AllProductsPage> {
       body: SafeArea(
         child: Consumer<SearchProvider>(
           builder: (_, provider, __) {
+            if (provider.currentSort != null) {
+              selectedSort =
+                  reverseSortMap[provider.currentSort] ?? "Sort by: Newest";
+            }
             if (provider.isLoading) {
               return const Center(child: CircularProgressIndicator());
             }
@@ -164,41 +172,42 @@ class _AllProductsPageState extends State<AllProductsPage> {
   }
 
   Widget _sort() {
-    return Container(
-      width: double.infinity,
+    return Consumer<SearchProvider>(
+      builder: (_, provider, __) {
+        return Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            border: Border.all(color: const Color(0xffdddddd)),
+          ),
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton<String>(
+              isExpanded: true,
+              value: selectedSort,
+              icon: const Icon(Icons.keyboard_arrow_down),
+              items: sortMap.keys.map((e) {
+                return DropdownMenuItem(
+                  value: e,
+                  child: Text(e),
+                );
+              }).toList(),
+              onChanged: (value) async {
+                if (value == null) return;
 
-      padding: const EdgeInsets.symmetric(horizontal: 20),
+                setState(() {
+                  selectedSort = value;
+                });
 
-      decoration: BoxDecoration(
-        color: Colors.white,
-
-        border: Border.all(color: const Color(0xffdddddd)),
-      ),
-
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
-          isExpanded: true,
-          value: selectedSort,
-          icon: const Icon(Icons.keyboard_arrow_down),
-          items: sortMap.keys.map((item) {
-            return DropdownMenuItem<String>(
-              value: item,
-              child: Text(item, style: const TextStyle(fontSize: 16)),
-            );
-          }).toList(),
-          onChanged: (value) async {
-            if (value == null) return;
-            setState(() {
-              selectedSort = value;
-            });
-
-            await context.read()<SearchProvider>().search(
-              widget.query,
-              sort: sortMap[value],
-            );
-          },
-        ),
-      ),
+                await provider.search(
+                  widget.query,
+                  sort: sortMap[value],
+                );
+              },
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -260,9 +269,9 @@ class _AllProductsPageState extends State<AllProductsPage> {
       pageBuilder: (_, __, ___) {
         return const FilterDrawer();
       },
-      transitionBuilder: (context, animation, secondaryAnimation, child) {
+      transitionBuilder: (_, animation, __, child) {
         return SlideTransition(
-          position: Tween<Offset>(
+          position: Tween(
             begin: const Offset(-1, 0),
             end: Offset.zero,
           ).animate(animation),

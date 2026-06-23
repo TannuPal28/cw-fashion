@@ -10,13 +10,21 @@ class SearchRepository {
     required int page,
     required int limit,
     required String query,
-    String? sort
+    String? sort,
+    String? category,
+    String? brand,
+    String? minPrice,
+    String? maxPrice,
   }) async {
     return await searchRemoteDatasource.search(
       page: page,
       limit: limit,
       query: query,
-      sort: sort
+      sort: sort,
+      category: category,
+      brand: brand,
+      minPrice: minPrice,
+      maxPrice: maxPrice,
     );
   }
 }

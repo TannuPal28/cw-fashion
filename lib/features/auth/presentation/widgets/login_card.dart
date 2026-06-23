@@ -1,16 +1,31 @@
+import 'package:cw_fashion/features/auth/presentation/bloc/auth_provider.dart';
 import 'package:cw_fashion/features/auth/presentation/pages/forgot_password_page.dart';
 import 'package:cw_fashion/features/auth/presentation/widgets/google_signin_button.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
+import '../../../home/presentation/pages/home_page.dart';
 import '../pages/sign_up_page.dart';
 import 'custom_auth_textfield.dart';
 
-class LoginCard extends StatelessWidget {
-  LoginCard({super.key});
+class LoginCard extends StatefulWidget {
+  const LoginCard({super.key});
 
+  @override
+  State<LoginCard> createState() => _LoginCardState();
+}
+
+class _LoginCardState extends State<LoginCard> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
+
+  @override
+  void dispose() {
+    super.dispose();
+    emailController.dispose();
+    passwordController.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,7 +63,10 @@ class LoginCard extends StatelessWidget {
 
           const SizedBox(height: 12),
 
-          CustomAuthTextField(hintText: "Enter your email"),
+          CustomAuthTextField(
+            controller: emailController,
+            hintText: "Enter your email",
+          ),
 
           const SizedBox(height: 25),
 
@@ -62,6 +80,7 @@ class LoginCard extends StatelessWidget {
           const SizedBox(height: 12),
 
           CustomAuthTextField(
+            controller: passwordController,
             hintText: "Enter your password",
             isPassword: true,
           ),
@@ -85,24 +104,39 @@ class LoginCard extends StatelessWidget {
           ),
 
           const SizedBox(height: 30),
-          SizedBox(
-            width: double.infinity,
-            height: 45,
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.black,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.zero),
-              ),
-              onPressed: () {},
-              child: const Text(
-                "SIGN IN",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  letterSpacing: 2,
+          Consumer<AuthProvider>(
+            builder: (_, provider, __) {
+              return SizedBox(
+                width: double.infinity,
+                height: 45,
+                child: ElevatedButton(
+                  onPressed: provider.isLoading
+                      ? null
+                      : () async {
+                          final success = await provider.login(
+                            email: emailController.text.trim(),
+                            password: passwordController.text.trim(),
+                          );
+
+                          if (success) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text("Login Successful")),
+                            );
+
+                            // Home Page
+                            Navigator.pushReplacement(
+                              context,
+
+                              MaterialPageRoute(builder: (_) => const HomePage()),
+                            );
+                          }
+                        },
+                  child: provider.isLoading
+                      ? const CircularProgressIndicator(color: Colors.white)
+                      : const Text("SIGN IN"),
                 ),
-              ),
-            ),
+              );
+            },
           ),
 
           const SizedBox(height: 30),

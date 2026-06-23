@@ -1,15 +1,43 @@
+import 'dart:math';
+
+import 'package:cw_fashion/features/auth/presentation/bloc/auth_provider.dart';
 import 'package:cw_fashion/features/auth/presentation/pages/sign_in_page.dart';
 import 'package:cw_fashion/features/auth/presentation/widgets/custom_auth_textfield.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../pages/verify_otp_page.dart';
 
-class CreateAccountCard extends StatelessWidget {
+class CreateAccountCard extends StatefulWidget {
   const CreateAccountCard({super.key});
 
   @override
+  State<CreateAccountCard> createState() => _CreateAccountCardState();
+}
+
+class _CreateAccountCardState extends State<CreateAccountCard> {
+  final nameController = TextEditingController();
+  final emailController = TextEditingController();
+  final phoneController = TextEditingController();
+  final referralController = TextEditingController();
+  final passwordController = TextEditingController();
+  final confirmPasswordController = TextEditingController();
+
+  @override
+  void dispose() {
+    nameController.dispose();
+    emailController.dispose();
+    phoneController.dispose();
+    referralController.dispose();
+    passwordController.dispose();
+    confirmPasswordController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final provider = context.watch<AuthProvider>();
     return Container(
       padding: const EdgeInsets.all(32),
       decoration: BoxDecoration(
@@ -28,7 +56,7 @@ class CreateAccountCard extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           const Text(
-            "Join CWFASHION today",
+            "Join FASHION today",
             style: TextStyle(fontSize: 18, color: Color(0xff6B7280)),
           ),
 
@@ -42,7 +70,7 @@ class CreateAccountCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-          const CustomAuthTextField(hintText: 'John Doe'),
+          CustomAuthTextField(controller: nameController, hintText: 'John Doe'),
           const SizedBox(height: 20),
 
           const Align(
@@ -53,7 +81,10 @@ class CreateAccountCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-          const CustomAuthTextField(hintText: 'john@example.com'),
+          CustomAuthTextField(
+            controller: emailController,
+            hintText: 'john@example.com',
+          ),
 
           const SizedBox(height: 20),
 
@@ -65,7 +96,10 @@ class CreateAccountCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-          const CustomAuthTextField(hintText: '+91 9876543210'),
+          CustomAuthTextField(
+            controller: phoneController,
+            hintText: '+91 9876543210',
+          ),
           const SizedBox(height: 20),
 
           const Align(
@@ -76,7 +110,10 @@ class CreateAccountCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-          const CustomAuthTextField(hintText: 'Enter referral code'),
+          CustomAuthTextField(
+            controller: referralController,
+            hintText: 'Enter referral code',
+          ),
 
           const SizedBox(height: 20),
 
@@ -88,7 +125,8 @@ class CreateAccountCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-          const CustomAuthTextField(
+          CustomAuthTextField(
+            controller: passwordController,
             hintText: 'Min 8 characters',
             isPassword: true,
           ),
@@ -101,7 +139,8 @@ class CreateAccountCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-          const CustomAuthTextField(
+          CustomAuthTextField(
+            controller: confirmPasswordController,
             hintText: 'Confirm your password',
             isPassword: true,
           ),
@@ -115,22 +154,59 @@ class CreateAccountCard extends StatelessWidget {
                 backgroundColor: Colors.black,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.zero),
               ),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => const VerifyOtpPage(),
-                  ),
-                );
-              },
-              child: const Text(
-                "Create Account",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  letterSpacing: 2,
-                ),
-              ),
+              onPressed: provider.isLoading
+                  ? null
+                  : () async {
+                      if (passwordController.text !=
+                          confirmPasswordController.text) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text("Passwords do not match"),
+                          ),
+                        );
+                        return;
+                      }
+
+                      final success = await provider.register(
+                        name: nameController.text.trim(),
+                        email: emailController.text.trim(),
+                        phone: phoneController.text.trim(),
+                        password: passwordController.text.trim(),
+                        referralCode: referralController.text.trim(),
+                      );
+
+                      if (success && context.mounted) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => VerifyOtpPage(
+                              email: emailController.text.trim(),
+                            ),
+                          ),
+                        );
+                      } else if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text("Registration Failed")),
+                        );
+                      }
+                    },
+              child: provider.isLoading
+                  ? const SizedBox(
+                      height: 22,
+                      width: 22,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                  : const Text(
+                      "Create Account",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        letterSpacing: 2,
+                      ),
+                    ),
             ),
           ),
 
