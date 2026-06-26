@@ -1,35 +1,34 @@
+import 'package:cw_fashion/features/all_products/presentation/bloc/product_detail_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class ProductActionSection extends StatefulWidget {
-  const ProductActionSection({super.key});
+  final String productId;
+
+  const ProductActionSection({super.key, required this.productId});
 
   @override
-  State<ProductActionSection> createState() =>
-      _ProductActionSectionState();
+  State<ProductActionSection> createState() => _ProductActionSectionState();
 }
 
-class _ProductActionSectionState
-    extends State<ProductActionSection> {
+class _ProductActionSectionState extends State<ProductActionSection> {
   int qty = 1;
 
   @override
   Widget build(BuildContext context) {
+    final provider = context.watch<ProductDetailProvider>();
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 18),
       child: Row(
         children: [
-
           /// Quantity
           Container(
             height: 50,
             decoration: BoxDecoration(
-              border: Border.all(
-                color: Colors.grey.shade300,
-              ),
+              border: Border.all(color: Colors.grey.shade300),
             ),
             child: Row(
               children: [
-
                 InkWell(
                   onTap: () {
                     if (qty > 1) {
@@ -56,16 +55,12 @@ class _ProductActionSectionState
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
                     border: Border.symmetric(
-                      vertical: BorderSide(
-                        color: Colors.grey.shade300,
-                      ),
+                      vertical: BorderSide(color: Colors.grey.shade300),
                     ),
                   ),
                   child: Text(
                     qty.toString(),
-                    style: const TextStyle(
-                      fontSize: 18,
-                    ),
+                    style: const TextStyle(fontSize: 18),
                   ),
                 ),
 
@@ -78,12 +73,7 @@ class _ProductActionSectionState
                   child: Container(
                     width: 30,
                     alignment: Alignment.center,
-                    child: const Text(
-                      "+",
-                      style: TextStyle(
-                        fontSize: 20,
-                      ),
-                    ),
+                    child: const Text("+", style: TextStyle(fontSize: 20)),
                   ),
                 ),
               ],
@@ -119,17 +109,36 @@ class _ProductActionSectionState
           const SizedBox(width: 15),
 
           /// Wishlist
-          Container(
-            width: 40,
-            height: 50,
-            decoration: BoxDecoration(
-              border: Border.all(
-                color: Colors.grey.shade300,
+          GestureDetector(
+            onTap: provider.wishlistLoading
+                ? null
+                : () {
+                    context.read<ProductDetailProvider>().toggleWishlist(
+                      widget.productId,
+                    );
+                  },
+            child: Container(
+              width: 40,
+              height: 50,
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey.shade300),
               ),
-            ),
-            child: const Icon(
-              Icons.favorite_border,
-              size: 24,
+              child: provider.wishlistLoading
+                  ? const Center(
+                      child: SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
+                    )
+                  : Icon(
+                      provider.isProductWishlisted(widget.productId)
+                          ? Icons.favorite
+                          : Icons.favorite_border,
+                      color: provider.isProductWishlisted(widget.productId)
+                          ? Colors.red
+                          : Colors.black,
+                    ),
             ),
           ),
         ],

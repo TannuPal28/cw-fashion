@@ -1,5 +1,6 @@
 import 'package:cw_fashion/features/auth/presentation/pages/sign_in_page.dart';
 import 'package:cw_fashion/features/home/presentation/widgets/side_menu_drawer.dart';
+import 'package:cw_fashion/features/wishlist/presentation/pages/wishlist_page.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -34,6 +35,7 @@ class _CustomHeaderState extends State<CustomHeader> {
     isLoggedIn = await AuthManager.isLoggedIn();
     setState(() {});
   }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -44,17 +46,19 @@ class _CustomHeaderState extends State<CustomHeader> {
       child: AnimatedSwitcher(
         duration: const Duration(milliseconds: 300),
         transitionBuilder: (child, animation) {
-          return SlideTransition(position: Tween<Offset>(
-            begin: const Offset(0, -0.2),
-            end: Offset.zero
-          ).animate(animation),
-          child: FadeTransition(opacity: animation,child: child
-            ,),);
+          return SlideTransition(
+            position: Tween<Offset>(
+              begin: const Offset(0, -0.2),
+              end: Offset.zero,
+            ).animate(animation),
+            child: FadeTransition(opacity: animation, child: child),
+          );
         },
         child: isSearching ? _searchHeader() : _normalHeader(),
       ),
     );
   }
+
   Widget _normalHeader() {
     return Container(
       key: const ValueKey("normal"),
@@ -91,10 +95,7 @@ class _CustomHeaderState extends State<CustomHeader> {
                   child: Text(
                     "CWFASHION",
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                   ),
                 ),
               ],
@@ -112,7 +113,23 @@ class _CustomHeaderState extends State<CustomHeader> {
 
           const SizedBox(width: 15),
 
-          const Icon(Icons.favorite_border),
+          GestureDetector(
+            onTap: () async {
+              if (!isLoggedIn) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const SignInPage()),
+                );
+                return;
+              }
+
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const WishlistPage()),
+              );
+            },
+            child: const Icon(Icons.favorite_border),
+          ),
 
           const SizedBox(width: 15),
 
@@ -120,25 +137,19 @@ class _CustomHeaderState extends State<CustomHeader> {
 
           const SizedBox(width: 15),
 
-          if(!isLoggedIn)
-
-          GestureDetector(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => const SignInPage(),
-                ),
-              );
-            },
-            child: const Text(
-              "Sign In",
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
+          if (!isLoggedIn)
+            GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const SignInPage()),
+                );
+              },
+              child: const Text(
+                "Sign In",
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
               ),
             ),
-          ),
         ],
       ),
     );
@@ -160,8 +171,7 @@ class _CustomHeaderState extends State<CustomHeader> {
                 decoration: InputDecoration(
                   hintText: "Search products...",
                   border: OutlineInputBorder(),
-                  contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 15),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 15),
                 ),
               ),
             ),
@@ -174,7 +184,7 @@ class _CustomHeaderState extends State<CustomHeader> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => AllProductsPage(query:searchController.text ,),
+                  builder: (_) => AllProductsPage(query: searchController.text),
                 ),
               );
             },
@@ -182,10 +192,7 @@ class _CustomHeaderState extends State<CustomHeader> {
               height: 48,
               width: 48,
               color: Colors.black,
-              child: const Icon(
-                Icons.search,
-                color: Colors.white,
-              ),
+              child: const Icon(Icons.search, color: Colors.white),
             ),
           ),
 
@@ -201,10 +208,7 @@ class _CustomHeaderState extends State<CustomHeader> {
             },
             child: const Text(
               "Cancel",
-              style: TextStyle(
-                color: Colors.grey,
-                fontSize: 18,
-              ),
+              style: TextStyle(color: Colors.grey, fontSize: 18),
             ),
           ),
         ],

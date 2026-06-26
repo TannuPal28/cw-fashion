@@ -6,6 +6,7 @@ import 'package:cw_fashion/features/home/presentation/widgets/custom_header.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../home/presentation/widgets/product_card.dart';
 import '../../data/models/product_detail_model.dart';
 import '../widgets/color_selector.dart';
 import '../widgets/product_action_section.dart';
@@ -29,7 +30,11 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
   void initState() {
     super.initState();
     Future.microtask(() {
-      context.read<ProductDetailProvider>().getProductDetail(widget.productId);
+      final provider = context.read<ProductDetailProvider>();
+
+      provider.getProductDetail(widget.productId);
+      provider.getRelatedProducts(widget.productId);
+      provider.getReviews(widget.productId);
     });
   }
 
@@ -77,9 +82,67 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                     });
                   },
                 ),
-                const ProductActionSection(),
-                const SizedBox(height: 25,),
-                DescriptionSection(product: product),],
+                ProductActionSection(productId: widget.productId,),
+                const SizedBox(height: 25),
+                DescriptionSection(product: product),
+                Consumer<ProductDetailProvider>(
+                  builder: (context, provider, child) {
+                    if (provider.relatedLoading) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    if (provider.relatedProducts.isEmpty) {
+                      return const SizedBox();
+                    }
+                    return Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            "You May Also Like",
+                            style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+
+                          const SizedBox(height: 15),
+                          GridView.builder(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: provider.relatedProducts.length,
+                            gridDelegate:
+                                const SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: 2,
+                                  childAspectRatio: .55,
+                                  crossAxisSpacing: 12,
+                                  mainAxisSpacing: 12,
+                                ),
+                            itemBuilder: (context, index) {
+                              final item = provider.relatedProducts[index];
+                              final discount =
+                                  (((item.mrp - item.price) / item.mrp) * 100)
+                                      .round();
+
+                              return ProductCard(
+                                image: item.image,
+                                title: item.title,
+                                price: "₹${item.price}",
+                                oldPrice: "₹${item.mrp}",
+                                sold: "${item.sold}+ sold",
+                                rating: item.rating,
+                                reviews: item.reviews,
+                                discount: "-$discount%",
+                              );
+                            },
+
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ],
             ),
           );
         },

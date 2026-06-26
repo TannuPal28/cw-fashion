@@ -113,6 +113,21 @@ class DioClient {
     );
   }
 
+  Future<Response> delete(
+      String url, {
+        dynamic data,
+        Map<String, dynamic>? queryParameters,
+        String? customBaseUrl,
+      }) async {
+    final String finalUrl = customBaseUrl != null ? "$customBaseUrl$url" : url;
+
+    return await dio.delete(
+      finalUrl,
+      data: data,
+      queryParameters: queryParameters,
+    );
+  }
+
   Future<Response> put(
       String url, {
         dynamic data,

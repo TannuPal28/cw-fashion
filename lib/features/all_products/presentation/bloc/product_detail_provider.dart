@@ -4,6 +4,9 @@ import 'package:cw_fashion/features/all_products/data/models/product_detail_mode
 import 'package:cw_fashion/features/all_products/data/repositories/product_detail_repository.dart';
 import 'package:flutter/cupertino.dart';
 
+import '../../data/models/product_review_model.dart';
+import '../../data/models/related_product_response_model.dart';
+
 class ProductDetailProvider extends ChangeNotifier {
   final ProductDetailRepository repository;
 
@@ -13,6 +16,12 @@ class ProductDetailProvider extends ChangeNotifier {
   ProductData? product;
   ProductVariant? selectedVariant;
   int selectedImageIndex = 0;
+
+  List<RelatedProduct> relatedProducts = [];
+  bool relatedLoading = false;
+
+  List<ProductReviewModel> reviews = [];
+  bool reviewLoading = false;
 
   String selectedColor = "";
   String selectedSize = "";
@@ -151,4 +160,64 @@ class ProductDetailProvider extends ChangeNotifier {
   String get description {
     return product?.description ?? "";
   }
+
+  Future<void> getRelatedProducts(String productId) async {
+    try {
+      relatedLoading = true;
+      notifyListeners();
+
+      relatedProducts =
+      await repository.getRelatedProducts(productId);
+
+    } catch (e) {
+      debugPrint(e.toString());
+    } finally {
+      relatedLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> getReviews(
+      String productId,
+      ) async {
+    try {
+      reviewLoading = true;
+      notifyListeners();
+
+      reviews =
+      await repository.getReviews(productId);
+
+    } catch (e) {
+      debugPrint(e.toString());
+    } finally {
+      reviewLoading = false;
+      notifyListeners();
+    }
+  }
+
+  bool isWishlisted = false;
+  bool wishlistLoading = false;
+
+  final Set<String> wishlistedProducts = {};
+  bool isProductWishlisted(String productId) {
+    return wishlistedProducts.contains(productId);
+  }
+
+  Future<void> toggleWishlist(String productId) async {
+    try {
+      if (wishlistedProducts.contains(productId)) {
+        await repository.removeFromWishlist(productId);
+        wishlistedProducts.remove(productId);
+      } else {
+        await repository.addToWishlist(productId);
+        wishlistedProducts.add(productId);
+      }
+    } catch (e) {
+      debugPrint(e.toString());
+    } finally {
+      wishlistLoading = false;
+      notifyListeners();
+    }
+  }
+
 }

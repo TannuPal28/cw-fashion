@@ -1,13 +1,13 @@
+import 'package:cw_fashion/features/all_products/presentation/bloc/product_detail_provider.dart';
+import 'package:cw_fashion/features/all_products/presentation/widgets/review_item.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../data/models/product_detail_model.dart';
 
 class DescriptionSection extends StatelessWidget {
   final ProductData product;
 
-  const DescriptionSection({
-    super.key,
-    required this.product,
-  });
+  const DescriptionSection({super.key, required this.product});
 
   @override
   Widget build(BuildContext context) {
@@ -16,16 +16,11 @@ class DescriptionSection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-
           Divider(color: Colors.grey.shade300),
-
 
           const Text(
             "Description",
-            style: TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-            ),
+            style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
           ),
 
           const SizedBox(height: 10),
@@ -50,10 +45,7 @@ class DescriptionSection extends StatelessWidget {
               children: [
                 const TextSpan(
                   text: "Sold by ",
-                  style: TextStyle(
-                    color: Colors.grey,
-                    fontSize: 18,
-                  ),
+                  style: TextStyle(color: Colors.grey, fontSize: 18),
                 ),
                 TextSpan(
                   text: product.vendor.storeName,
@@ -75,10 +67,7 @@ class DescriptionSection extends StatelessWidget {
 
           const Text(
             "Customer Reviews",
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-            ),
+            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
           ),
 
           const SizedBox(height: 20),
@@ -95,17 +84,30 @@ class DescriptionSection extends StatelessWidget {
             ],
           ),
 
-          const SizedBox(height: 70),
+          const SizedBox(height: 20),
+          Consumer<ProductDetailProvider>(
+            builder: (context, provider, child) {
+              if (provider.reviewLoading) {
+                return const Center(child: CircularProgressIndicator());
+              }
 
-          const Center(
-            child: Text(
-              "No reviews yet. Be the first to review!",
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: Colors.grey,
-                fontSize: 20,
-              ),
-            ),
+              if (provider.reviews.isEmpty) {
+                return const Padding(
+                  padding: EdgeInsets.all(20),
+                  child: Center(child: Text("No reviews yet")),
+                );
+              }
+              return ListView.separated(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemBuilder: (context,index){
+                    final review= provider.reviews[index];
+                    return ReviewItem(review:review);
+                  },
+                  separatorBuilder: (_, __) =>
+                      Divider(color: Colors.grey.shade300),
+                  itemCount: provider.reviews.length);
+            },
           ),
 
           const SizedBox(height: 80),
@@ -116,10 +118,7 @@ class DescriptionSection extends StatelessWidget {
 
   static Widget chip(String text, bool selected) {
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 22,
-        vertical: 12,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 12),
       decoration: BoxDecoration(
         color: selected ? Colors.black : Colors.grey.shade100,
         borderRadius: BorderRadius.circular(30),

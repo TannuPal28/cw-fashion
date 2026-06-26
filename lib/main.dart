@@ -12,6 +12,9 @@ import 'package:cw_fashion/features/home/data/datasources/home_remote_datasource
 import 'package:cw_fashion/features/home/data/repositories/home_repository.dart';
 import 'package:cw_fashion/features/home/presentation/bloc/home_provider.dart';
 import 'package:cw_fashion/features/home/presentation/pages/home_page.dart';
+import 'package:cw_fashion/features/wishlist/data/datasources/wishlist_remove_datasources.dart';
+import 'package:cw_fashion/features/wishlist/data/repository/wishlist_repository.dart';
+import 'package:cw_fashion/features/wishlist/presentation/bloc/wishlist_provider.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -53,6 +56,11 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(
           create: (_) => ProductDetailProvider(
             ProductDetailRepository(ProductDetailRemoteDatasource(DioClient())),
+          ),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => WishlistProvider(
+            WishlistRepository(WishlistRemoveDatasources(DioClient())),
           ),
         ),
       ],
