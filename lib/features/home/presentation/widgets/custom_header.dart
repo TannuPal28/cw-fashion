@@ -1,4 +1,5 @@
 import 'package:cw_fashion/features/auth/presentation/pages/sign_in_page.dart';
+import 'package:cw_fashion/features/cart/presentation/pages/cart_page.dart';
 import 'package:cw_fashion/features/home/presentation/widgets/side_menu_drawer.dart';
 import 'package:cw_fashion/features/wishlist/presentation/pages/wishlist_page.dart';
 import 'package:flutter/cupertino.dart';
@@ -133,7 +134,23 @@ class _CustomHeaderState extends State<CustomHeader> {
 
           const SizedBox(width: 15),
 
-          const Icon(Icons.shopping_bag_outlined),
+          GestureDetector(
+            onTap: () async {
+              if (!isLoggedIn) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const SignInPage()),
+                );
+                return;
+              }
+
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const CartPage()),
+              );
+            },
+            child: const Icon(Icons.shopping_bag_outlined),
+          ),
 
           const SizedBox(width: 15),
 

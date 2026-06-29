@@ -8,6 +8,9 @@ import 'package:cw_fashion/features/all_products/presentation/bloc/search_provid
 import 'package:cw_fashion/features/auth/data/datasources/auth_remote_datasource.dart';
 import 'package:cw_fashion/features/auth/data/repository/auth_repository.dart';
 import 'package:cw_fashion/features/auth/presentation/bloc/auth_provider.dart';
+import 'package:cw_fashion/features/cart/data/datasources/cart_remote_datasources.dart';
+import 'package:cw_fashion/features/cart/data/repository/cart_repository.dart';
+import 'package:cw_fashion/features/cart/presentation/bloc/cart_provider.dart';
 import 'package:cw_fashion/features/home/data/datasources/home_remote_datasource.dart';
 import 'package:cw_fashion/features/home/data/repositories/home_repository.dart';
 import 'package:cw_fashion/features/home/presentation/bloc/home_provider.dart';
@@ -61,6 +64,11 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(
           create: (_) => WishlistProvider(
             WishlistRepository(WishlistRemoveDatasources(DioClient())),
+          ),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => CartProvider(
+            CartRepository(CartRemoteDatasource(DioClient())),
           ),
         ),
       ],
