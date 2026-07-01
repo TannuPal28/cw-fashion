@@ -4,6 +4,7 @@ import 'package:cw_fashion/features/all_products/data/models/product_detail_mode
 import 'package:cw_fashion/features/all_products/data/repositories/product_detail_repository.dart';
 import 'package:flutter/cupertino.dart';
 
+import '../../data/models/add_to_cart_response.dart';
 import '../../data/models/product_review_model.dart';
 import '../../data/models/related_product_response_model.dart';
 
@@ -13,6 +14,7 @@ class ProductDetailProvider extends ChangeNotifier {
   ProductDetailProvider(this.repository);
 
   bool isLoading = false;
+  bool cartLoading = false;
   ProductData? product;
   ProductVariant? selectedVariant;
   int selectedImageIndex = 0;
@@ -216,6 +218,33 @@ class ProductDetailProvider extends ChangeNotifier {
       debugPrint(e.toString());
     } finally {
       wishlistLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<bool> addToCart(int quantity) async {
+    try {
+      if (selectedVariant == null) return false;
+
+      cartLoading = true;
+      notifyListeners();
+
+      await repository.addToCart(
+        AddToCartRequest(
+          productId: product!.id,
+          variantId: selectedVariant!.id,
+          quantity: quantity,
+          color: selectedVariant!.color,
+          size: selectedVariant!.size,
+        ),
+      );
+
+      return true;
+    } catch (e) {
+      debugPrint(e.toString());
+      return false;
+    } finally {
+      cartLoading = false;
       notifyListeners();
     }
   }

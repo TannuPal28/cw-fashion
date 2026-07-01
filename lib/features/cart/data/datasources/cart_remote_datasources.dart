@@ -4,6 +4,7 @@ import 'package:cw_fashion/core/network/api_constants.dart';
 import 'package:http/http.dart' as dio;
 
 import '../../../../core/network/dio_client.dart';
+import '../models/address_response_model.dart';
 import '../models/cart_model.dart';
 
 class CartRemoteDatasource {
@@ -31,5 +32,18 @@ class CartRemoteDatasource {
 
   Future<void> removeCartItem(String cartItemId) async {
     await dioClient.delete("/cart/$cartItemId");
+  }
+  Future<AddressResponse> getAddresses() async {
+    final response = await dioClient.get(
+      "/users/addresses",
+    );
+
+    return AddressResponse.fromJson(response.data);
+  }
+  Future<void> addAddress(Map<String, dynamic> body) async {
+    await dioClient.post(
+      "/users/addresses",
+      data: body,
+    );
   }
 }

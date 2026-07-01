@@ -87,21 +87,41 @@ class _ProductActionSectionState extends State<ProductActionSection> {
             child: SizedBox(
               height: 50,
               child: ElevatedButton(
-                onPressed: () {},
+                onPressed: provider.cartLoading
+                    ? null
+                    : () async {
+                        final success = await provider.addToCart(qty);
+                        if (!context.mounted) return;
+
+                        if (success) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text("Added to cart")),
+                          );
+                        }
+                      },
                 style: ElevatedButton.styleFrom(
                   elevation: 0,
                   backgroundColor: Colors.black,
                   shape: const RoundedRectangleBorder(),
                 ),
-                child: const Text(
-                  "ADD TO CART",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 14,
-                    letterSpacing: 1,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
+                child: provider.cartLoading
+                    ? const SizedBox(
+                        width: 22,
+                        height: 22,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        ),
+                      )
+                    : const Text(
+                        "ADD TO CART",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          letterSpacing: 1,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
               ),
             ),
           ),

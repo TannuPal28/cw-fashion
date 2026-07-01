@@ -1,5 +1,5 @@
 class ApiConstants {
-  static const String baseUrl = "http://192.168.2.208:5173/api/";
+  static const String baseUrl = "http://192.168.2.151:5173/api/";
   static const String register = "auth/register";
   static const String login = "auth/login";
   static const String verifyEmail = "auth/verify-email";
@@ -15,4 +15,5 @@ class ApiConstants {
   static const String search = "/search";
   static const String productDetail = "/products";
   static const String cart = "/cart";
+  static const String addToCart = "/cart/add";
 }

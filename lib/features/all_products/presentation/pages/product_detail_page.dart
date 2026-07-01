@@ -23,8 +23,6 @@ class ProductDetailPage extends StatefulWidget {
 }
 
 class _ProductDetailPageState extends State<ProductDetailPage> {
-  String selectedColor = "";
-  ProductVariant? selectedVariant;
 
   @override
   void initState() {
@@ -68,18 +66,16 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                 ColorSelector(
                   product: product,
                   onColorSelected: (color) {
-                    setState(() {
-                      selectedColor = color;
-                    });
+                    context.read()<ProductDetailProvider>().selectColor(color);
                   },
                 ),
                 SizeSelector(
                   product: product,
-                  selectedColor: selectedColor,
+                  selectedColor: provider.selectedColor,
                   onSizeSelected: (variant) {
-                    setState(() {
-                      selectedVariant = variant;
-                    });
+                    context
+                        .read<ProductDetailProvider>()
+                        .selectSize(variant.size);
                   },
                 ),
                 ProductActionSection(productId: widget.productId,),

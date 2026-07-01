@@ -1,3 +1,4 @@
+import 'package:cw_fashion/features/cart/presentation/pages/checkout_page.dart';
 import 'package:flutter/material.dart';
 
 class OrderSummarySection extends StatelessWidget {
@@ -177,7 +178,12 @@ class OrderSummarySection extends StatelessWidget {
                 backgroundColor: Colors.black,
                 shape: const RoundedRectangleBorder(),
               ),
-              onPressed: () {},
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const CheckoutPage()),
+                );
+              },
               child: const Text(
                 "PROCEED TO CHECKOUT",
                 style: TextStyle(

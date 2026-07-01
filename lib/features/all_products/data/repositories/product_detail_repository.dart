@@ -1,6 +1,7 @@
 import 'package:cw_fashion/features/all_products/data/datasources/product_detail_remote_datasource.dart';
 import 'package:cw_fashion/features/all_products/data/models/product_detail_model.dart';
 
+import '../models/add_to_cart_response.dart';
 import '../models/product_review_model.dart';
 import '../models/related_product_response_model.dart';
 
@@ -27,5 +28,8 @@ class ProductDetailRepository {
 
   Future<List<String>> removeFromWishlist(String productId) {
     return productDetailRemoteDatasource.removeFromWishlist(productId);
+  }
+  Future<void> addToCart(AddToCartRequest request) {
+    return productDetailRemoteDatasource.addToCart(request);
   }
 }

@@ -3,6 +3,7 @@ import 'package:cw_fashion/core/network/dio_client.dart';
 import 'package:cw_fashion/features/all_products/data/models/product_detail_model.dart';
 import 'package:dio/dio.dart';
 
+import '../models/add_to_cart_response.dart';
 import '../models/product_review_model.dart';
 import '../models/related_product_response_model.dart';
 
@@ -67,6 +68,11 @@ class ProductDetailRemoteDatasource {
 
     return List<String>.from(response.data["wishlist"]);
   }
-
+  Future<void> addToCart(AddToCartRequest request) async {
+    await dioClient.post(
+      ApiConstants.addToCart,
+      data: request.toJson(),
+    );
+  }
 
 }
