@@ -1,3 +1,7 @@
+
+
+import '../../../../core/utils/utility.dart';
+
 class CartResponse {
   final bool success;
   final Cart cart;
@@ -36,6 +40,9 @@ class Cart {
 
 class CartItem {
   final String id;
+  final String productId;
+  final String variantId;
+
   final String name;
   final String image;
   final String color;
@@ -47,6 +54,8 @@ class CartItem {
 
   CartItem({
     required this.id,
+    required this.productId,
+    required this.variantId,
     required this.name,
     required this.image,
     required this.color,
@@ -59,15 +68,27 @@ class CartItem {
 
   factory CartItem.fromJson(Map<String, dynamic> json) {
     return CartItem(
-      id: json["_id"],
-      name: json["name"],
-      image: json["image"],
-      color: json["color"],
-      size: json["size"],
-      quantity: json["quantity"],
-      price: json["price"],
-      mrp: json["mrp"],
-      vendor: json["vendor"]["storeName"],
+      id: json["_id"] ?? "",
+
+      productId: parseId(json["product"]),
+
+      variantId: parseId(json["variant"]),
+
+      name: json["name"] ?? "",
+
+      image: json["image"] ?? "",
+
+      color: json["color"] ?? "",
+
+      size: json["size"] ?? "",
+
+      quantity: json["quantity"] ?? 0,
+
+      price: json["price"] ?? 0,
+
+      mrp: json["mrp"] ?? 0,
+
+      vendor: parseName(json["vendor"], "storeName"),
     );
   }
 }
@@ -87,10 +108,10 @@ class ShippingInfo {
 
   factory ShippingInfo.fromJson(Map<String, dynamic> json) {
     return ShippingInfo(
-      subtotal: json["subtotal"],
-      discount: json["discount"],
-      charge: json["charge"],
-      total: json["total"],
+      subtotal: json["subtotal"] ?? 0,
+      discount: json["discount"] ?? 0,
+      charge: json["charge"] ?? 0,
+      total: json["total"] ?? 0,
     );
   }
 }

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../data/models/address_response_model.dart';
 import '../../data/models/cart_model.dart';
+import '../../data/models/order_response.dart';
+import '../../data/models/razorpay_order_model.dart';
 import '../../data/repository/cart_repository.dart';
 
 class CartProvider extends ChangeNotifier {
@@ -117,7 +119,7 @@ class CartProvider extends ChangeNotifier {
       addresses = response.addresses;
       if (addresses.isNotEmpty) {
         selectedAddress ??= addresses.firstWhere(
-              (e) => e.isDefault,
+          (e) => e.isDefault,
           orElse: () => addresses.first,
         );
       }
@@ -177,5 +179,107 @@ class CartProvider extends ChangeNotifier {
   void selectAddress(AddressModel address) {
     selectedAddress = address;
     notifyListeners();
+  }
+
+  bool placeOrderLoading = false;
+
+  Future<OrderModel?> placeOrder(String paymentMethod) async {
+    try {
+      placeOrderLoading = true;
+      notifyListeners();
+
+      final response = await repository.placeOrder({
+        "items": items.map((e) {
+          return {
+            "productId": e.productId,
+            "variantId": e.variantId,
+            "quantity": e.quantity,
+          };
+        }).toList(),
+
+        "shippingAddress": selectedAddress!.toJson(),
+
+        "paymentMethod": paymentMethod,
+      });
+
+      await getCart(showLoader: false);
+
+      return response.order;
+    } finally {
+      placeOrderLoading = false;
+      notifyListeners();
+    }
+  }
+
+  OrderModel? orderDetail;
+
+  bool orderLoading = false;
+
+  Future<void> getOrderDetail(String orderId) async {
+    try {
+      orderLoading = true;
+
+      notifyListeners();
+
+      final response = await repository.getOrderDetail(orderId);
+
+      orderDetail = response.order;
+    } finally {
+      orderLoading = false;
+
+      notifyListeners();
+    }
+  }
+
+  Future<RazorpayOrderModel> createRazorpayOrder(
+      String orderId) async {
+
+    return repository.createRazorpayOrder({
+      "orderId": orderId,
+    });
+
+  }
+
+  Color getOrderStatusColor(String status){
+
+    switch(status.toLowerCase()){
+
+      case "pending":
+        return Colors.orange;
+
+      case "confirmed":
+        return Colors.blue;
+
+      case "shipped":
+        return Colors.indigo;
+
+      case "delivered":
+        return Colors.green;
+
+      case "cancelled":
+        return Colors.red;
+
+      default:
+        return Colors.grey;
+    }
+
+  }
+  Color getPaymentStatusColor(String status){
+
+    switch(status.toLowerCase()){
+
+      case "paid":
+        return Colors.green;
+
+      case "pending":
+        return Colors.orange;
+
+      case "failed":
+        return Colors.red;
+
+      default:
+        return Colors.grey;
+    }
+
   }
 }

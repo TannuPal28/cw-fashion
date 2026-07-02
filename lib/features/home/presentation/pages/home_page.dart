@@ -40,15 +40,15 @@ class HomePage extends StatelessWidget {
                   const SizedBox(height: 20),
                   provider.featuresIsLoading
                       ? const Center(
-                    child: Padding(
-                      padding: EdgeInsets.all(20),
-                      child: CircularProgressIndicator(),
-                    ),
-                  )
+                          child: Padding(
+                            padding: EdgeInsets.all(20),
+                            child: CircularProgressIndicator(),
+                          ),
+                        )
                       : TrendingSection(
-                    title: "Featured Products",
-                    products: provider.features,
-                  ),
+                          title: "Featured Products",
+                          products: provider.features,
+                        ),
                   const SizedBox(height: 20),
 
                   provider.trendingIsLoading

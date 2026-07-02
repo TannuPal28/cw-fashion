@@ -1,0 +1,294 @@
+import 'package:cw_fashion/features/cart/presentation/bloc/cart_provider.dart';
+import 'package:cw_fashion/features/home/presentation/widgets/custom_header.dart';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../../home/presentation/pages/home_page.dart';
+import '../../data/models/order_response.dart';
+import '../widgets/order_address_section.dart';
+import '../widgets/order_detail_summary_section.dart';
+import '../widgets/order_product_card.dart';
+import '../widgets/order_summary_section.dart';
+
+class OrderDetailPage extends StatefulWidget {
+  final String orderId;
+
+  const OrderDetailPage({super.key, required this.orderId});
+
+  @override
+  State<OrderDetailPage> createState() => _OrderDetailPageState();
+}
+
+class _OrderDetailPageState extends State<OrderDetailPage> {
+  @override
+  void initState() {
+    super.initState();
+
+    Future.microtask(() {
+      context.read<CartProvider>().getOrderDetail(widget.orderId);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xfff8f8f8),
+
+      body: Consumer<CartProvider>(
+        builder: (_, provider, __) {
+          if (provider.orderLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          final order = provider.orderDetail;
+
+          if (order == null) {
+            return const Center(child: Text("Order not found"));
+          }
+
+          return SafeArea(
+            child: Column(
+              children: [
+                const CustomHeader(),
+
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(18),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          "Order Details",
+                          style: TextStyle(
+                            fontSize: 34,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: "Times New Roman",
+                          ),
+                        ),
+
+                        const SizedBox(height: 25),
+
+                        Container(
+                          padding: const EdgeInsets.all(20),
+                          color: Colors.white,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          "Order #${order.orderNumber}",
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.w600,
+                                            fontSize: 20,
+                                          ),
+                                        ),
+
+                                        const SizedBox(height: 8),
+
+                                        Text(
+                                          "Placed on ${order.placedDate}",
+                                          style: TextStyle(
+                                            color: Colors.grey.shade600,
+                                            fontSize: 16,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                      vertical: 8,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: provider
+                                          .getOrderStatusColor(order.status)
+                                          .withOpacity(.15),
+                                    ),
+                                    child: Text(
+                                      order.status.toUpperCase(),
+                                      style: TextStyle(
+                                        color: provider.getOrderStatusColor(
+                                          order.status,
+                                        ),
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+
+                              const SizedBox(height: 20),
+
+                              SizedBox(
+                                height: 48,
+                                child: OutlinedButton.icon(
+                                  onPressed: () {
+                                    /// invoice later
+                                  },
+                                  style: OutlinedButton.styleFrom(
+                                    shape: const RoundedRectangleBorder(),
+                                  ),
+                                  icon: const Icon(
+                                    Icons.receipt_long,
+                                    color: Colors.black,
+                                  ),
+                                  label: const Text(
+                                    "Download Invoice",
+                                    style: TextStyle(color: Colors.black),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        const SizedBox(height: 18),
+
+                        const Text(
+                          "Products",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 22,
+                          ),
+                        ),
+
+                        const SizedBox(height: 15),
+
+                        ...order.items.map(
+                          (item) => Padding(
+                            padding: const EdgeInsets.only(bottom: 15),
+                            child: OrderProductCard(item: item),
+                          ),
+                        ),
+
+                        const SizedBox(height: 18),
+
+                        OrderAddressSection(
+                          title: "Shipping Address",
+                          address: order.shippingAddress,
+                        ),
+
+                        const SizedBox(height: 18),
+
+                        OrderDetailSummarySection(
+                          subtotal: order.subtotal,
+                          shipping: order.shippingCharge,
+                          discount: order.discount,
+                          total: order.total,
+                        ),
+
+                        const SizedBox(height: 18),
+
+                        Container(
+                          padding: const EdgeInsets.all(20),
+                          color: Colors.white,
+                          child: Row(
+                            children: [
+                              const Icon(Icons.payments),
+
+                              const SizedBox(width: 12),
+
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      order.payment.method.toUpperCase(),
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 18,
+                                      ),
+                                    ),
+
+                                    const SizedBox(height: 4),
+
+                                    Text(
+                                      order.payment.status.toUpperCase(),
+                                      style: TextStyle(
+                                        color: provider.getPaymentStatusColor(
+                                          order.payment.status,
+                                        ),
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        const SizedBox(height: 25),
+
+                        if (order.status == "pending")
+                          SizedBox(
+                            width: double.infinity,
+                            height: 50,
+                            child: ElevatedButton(
+                              onPressed: () {
+                                /// cancel order
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.red,
+                                shape: const RoundedRectangleBorder(),
+                              ),
+                              child: const Text(
+                                "CANCEL ORDER",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  letterSpacing: 1,
+                                ),
+                              ),
+                            ),
+                          ),
+
+                        const SizedBox(height: 5),
+
+                        SizedBox(
+                          width: double.infinity,
+                          height: 50,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              Navigator.pushAndRemoveUntil(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const HomePage(),
+                                ),
+                                (route) => false,
+                              );
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.blue,
+                              shape: const RoundedRectangleBorder(),
+                            ),
+                            child: const Text(
+                              "Return Home",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                letterSpacing: 1,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 30),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+}

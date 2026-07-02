@@ -1,5 +1,8 @@
 import 'package:cw_fashion/features/all_products/presentation/pages/all_products_page.dart';
+import 'package:cw_fashion/features/cart/presentation/pages/cart_page.dart';
 import 'package:cw_fashion/features/home/presentation/pages/home_page.dart';
+import 'package:cw_fashion/features/profile/presentation/pages/profile_page.dart';
+import 'package:cw_fashion/features/wishlist/presentation/pages/wishlist_page.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -116,9 +119,15 @@ class _SideMenuDrawerState extends State<SideMenuDrawer> {
                           );
                         }),
 
-                        menuItem("Wishlist", () {}),
+                        menuItem("Wishlist", () {
+                          Navigator.pop(context);
+                          Navigator.push(context, MaterialPageRoute(builder: (_) => WishlistPage()));
+                        }),
 
-                        menuItem("Cart (0)", () {}),
+                        menuItem("Cart (0)", () {
+                          Navigator.pop(context);
+                          Navigator.push(context, MaterialPageRoute(builder: (_) => CartPage()));
+                        }),
 
                         const Divider(),
 
@@ -143,7 +152,15 @@ class _SideMenuDrawerState extends State<SideMenuDrawer> {
                             );
                           }),
                         ] else ...[
-                          menuItem("Profile", () {}),
+                          menuItem("Profile", () {
+                            Navigator.pop(context);
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const ProfilePage(),
+                              ),
+                            );
+                          }),
 
                           menuItem("Orders", () {}),
 

@@ -2,10 +2,7 @@ class AddressResponse {
   final bool success;
   final List<AddressModel> addresses;
 
-  AddressResponse({
-    required this.success,
-    required this.addresses,
-  });
+  AddressResponse({required this.success, required this.addresses});
 
   factory AddressResponse.fromJson(Map<String, dynamic> json) {
     return AddressResponse(
@@ -67,5 +64,24 @@ class AddressModel {
       isDefault: json["isDefault"] ?? false,
       addressType: json["addressType"] ?? "",
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      "_id": id,
+      "label": label,
+      "fullName": fullName,
+      "phone": phone,
+      "alternatePhone": alternatePhone,
+      "addressLine1": addressLine1,
+      "addressLine2": addressLine2,
+      "landmark": landmark,
+      "city": city,
+      "state": state,
+      "pincode": pincode,
+      "country": country,
+      "isDefault": isDefault,
+      "addressType": addressType,
+    };
   }
 }
