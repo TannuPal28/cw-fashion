@@ -22,6 +22,10 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'features/profile/data/datasources/profile_remote_datasource.dart';
+import 'features/profile/data/repositories/profile_repository.dart';
+import 'features/profile/presentation/bloc/profile_provider.dart';
+
 void main() {
   runApp(const MyApp());
 }
@@ -67,8 +71,12 @@ class MyApp extends StatelessWidget {
           ),
         ),
         ChangeNotifierProvider(
-          create: (_) => CartProvider(
-            CartRepository(CartRemoteDatasource(DioClient())),
+          create: (_) =>
+              CartProvider(CartRepository(CartRemoteDatasource(DioClient()))),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => ProfileProvider(
+            ProfileRepository(ProfileRemoteDatasource(DioClient())),
           ),
         ),
       ],
