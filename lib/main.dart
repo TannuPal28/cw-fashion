@@ -15,6 +15,10 @@ import 'package:cw_fashion/features/home/data/datasources/home_remote_datasource
 import 'package:cw_fashion/features/home/data/repositories/home_repository.dart';
 import 'package:cw_fashion/features/home/presentation/bloc/home_provider.dart';
 import 'package:cw_fashion/features/home/presentation/pages/home_page.dart';
+import 'package:cw_fashion/features/my_orders/data/datasources/my_orders_remote_deatasource.dart';
+import 'package:cw_fashion/features/my_orders/data/repositories/my_orders_repositories.dart';
+import 'package:cw_fashion/features/my_orders/presentation/bloc/my_orders_provier.dart';
+import 'package:cw_fashion/features/my_orders/presentation/pages/my_orders_page.dart';
 import 'package:cw_fashion/features/wishlist/data/datasources/wishlist_remove_datasources.dart';
 import 'package:cw_fashion/features/wishlist/data/repository/wishlist_repository.dart';
 import 'package:cw_fashion/features/wishlist/presentation/bloc/wishlist_provider.dart';
@@ -22,9 +26,15 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'features/my_orders/data/datasources/review_remote_datasource.dart';
+import 'features/my_orders/data/repositories/review_repository.dart';
+import 'features/my_orders/presentation/bloc/review_provider.dart';
 import 'features/profile/data/datasources/profile_remote_datasource.dart';
 import 'features/profile/data/repositories/profile_repository.dart';
 import 'features/profile/presentation/bloc/profile_provider.dart';
+import 'features/wallet/data/datasources/wallet_remote_datasources.dart';
+import 'features/wallet/data/repository/wallet_repository.dart';
+import 'features/wallet/presentation/bloc/wallet_provider.dart';
 
 void main() {
   runApp(const MyApp());
@@ -77,6 +87,26 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(
           create: (_) => ProfileProvider(
             ProfileRepository(ProfileRemoteDatasource(DioClient())),
+          ),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => OrderProvider(
+            MyOrdersRepositories(MyOrdersRemoteDeatasource(DioClient())),
+          ),
+        ),
+
+        ChangeNotifierProvider(
+          create: (_) => WalletProvider(
+            WalletRepository(WalletRemoteDataSource(DioClient())),
+          ),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => ReviewProvider(
+            ReviewRepository(
+              ReviewRemoteDatasource(
+                DioClient(),
+              ),
+            ),
           ),
         ),
       ],

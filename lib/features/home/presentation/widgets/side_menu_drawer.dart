@@ -1,7 +1,9 @@
 import 'package:cw_fashion/features/all_products/presentation/pages/all_products_page.dart';
 import 'package:cw_fashion/features/cart/presentation/pages/cart_page.dart';
 import 'package:cw_fashion/features/home/presentation/pages/home_page.dart';
+import 'package:cw_fashion/features/my_orders/presentation/pages/my_orders_page.dart';
 import 'package:cw_fashion/features/profile/presentation/pages/profile_page.dart';
+import 'package:cw_fashion/features/wallet/presentation/pages/wallet_page.dart';
 import 'package:cw_fashion/features/wishlist/presentation/pages/wishlist_page.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -162,11 +164,27 @@ class _SideMenuDrawerState extends State<SideMenuDrawer> {
                             );
                           }),
 
-                          menuItem("Orders", () {}),
+                          menuItem("Orders", () {
+                            Navigator.pop(context);
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const MyOrdersPage(),
+                              ),
+                            );
+                          }),
 
                           menuItem("My Reviews", () {}),
 
-                          menuItem("Wallet", () {}),
+                          menuItem("Wallet", () {
+                            Navigator.pop(context);
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const WalletPage(),
+                              ),
+                            );
+                          }),
 
                           menuItem("Refer & Earn", () {}),
 

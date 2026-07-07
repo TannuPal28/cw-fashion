@@ -3,11 +3,13 @@ import 'package:cw_fashion/features/home/presentation/widgets/custom_header.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../home/presentation/pages/home_page.dart';
+import '../../../my_orders/presentation/bloc/review_provider.dart';
+import '../../../my_orders/presentation/pages/review_bottom_sheet.dart';
+import '../../../my_orders/presentation/pages/review_detail_bottom_sheet.dart';
 import '../../data/models/order_response.dart';
 import '../widgets/order_address_section.dart';
 import '../widgets/order_detail_summary_section.dart';
 import '../widgets/order_product_card.dart';
-import '../widgets/order_summary_section.dart';
 
 class OrderDetailPage extends StatefulWidget {
   final String orderId;
@@ -23,23 +25,27 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
   void initState() {
     super.initState();
 
-    Future.microtask(() {
-      context.read<CartProvider>().getOrderDetail(widget.orderId);
+    Future.microtask(() async {
+      await context.read<CartProvider>().getOrderDetail(widget.orderId);
+
+      await context.read<ReviewProvider>().getMyReviews(widget.orderId);
     });
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xfff8f8f8),
 
-      body: Consumer<CartProvider>(
-        builder: (_, provider, __) {
-          if (provider.orderLoading) {
+      body: Consumer2<CartProvider, ReviewProvider>(
+        builder: (_, cartProvider, reviewProvider, __) {
+          if (cartProvider.orderLoading) {
             return const Center(child: CircularProgressIndicator());
           }
 
-          final order = provider.orderDetail;
+          final order = cartProvider.orderDetail;
+          final item = order?.items.first;
+
+          final reviewed = reviewProvider.isReviewed(item!.id);
 
           if (order == null) {
             return const Center(child: Text("Order not found"));
@@ -107,14 +113,14 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                                       vertical: 8,
                                     ),
                                     decoration: BoxDecoration(
-                                      color: provider
+                                      color: cartProvider
                                           .getOrderStatusColor(order.status)
                                           .withOpacity(.15),
                                     ),
                                     child: Text(
                                       order.status.toUpperCase(),
                                       style: TextStyle(
-                                        color: provider.getOrderStatusColor(
+                                        color: cartProvider.getOrderStatusColor(
                                           order.status,
                                         ),
                                         fontWeight: FontWeight.bold,
@@ -126,7 +132,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
 
                               const SizedBox(height: 20),
 
-                              SizedBox(
+                              /*SizedBox(
                                 height: 48,
                                 child: OutlinedButton.icon(
                                   onPressed: () {
@@ -144,7 +150,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                                     style: TextStyle(color: Colors.black),
                                   ),
                                 ),
-                              ),
+                              ),*/
                             ],
                           ),
                         ),
@@ -212,7 +218,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                                     Text(
                                       order.payment.status.toUpperCase(),
                                       style: TextStyle(
-                                        color: provider.getPaymentStatusColor(
+                                        color: cartProvider.getPaymentStatusColor(
                                           order.payment.status,
                                         ),
                                         fontWeight: FontWeight.w600,
@@ -227,13 +233,13 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
 
                         const SizedBox(height: 25),
 
-                        if (order.status == "pending")
+                        if (order.status.toLowerCase() == "pending") ...[
                           SizedBox(
                             width: double.infinity,
                             height: 50,
                             child: ElevatedButton(
                               onPressed: () {
-                                /// cancel order
+                                // Cancel Order API
                               },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.red,
@@ -250,35 +256,192 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                             ),
                           ),
 
-                        const SizedBox(height: 5),
+                          const SizedBox(height: 12),
 
-                        SizedBox(
-                          width: double.infinity,
-                          height: 50,
-                          child: ElevatedButton(
-                            onPressed: () {
-                              Navigator.pushAndRemoveUntil(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => const HomePage(),
+                          SizedBox(
+                            width: double.infinity,
+                            height: 50,
+                            child: ElevatedButton(
+                              onPressed: () {
+                                Navigator.pushAndRemoveUntil(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => const HomePage(),
+                                  ),
+                                      (route) => false,
+                                );
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.blue,
+                                shape: const RoundedRectangleBorder(),
+                              ),
+                              child: const Text(
+                                "RETURN HOME",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  letterSpacing: 1,
                                 ),
-                                (route) => false,
-                              );
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.blue,
-                              shape: const RoundedRectangleBorder(),
-                            ),
-                            child: const Text(
-                              "Return Home",
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                                letterSpacing: 1,
                               ),
                             ),
                           ),
-                        ),
+                        ]
+
+                        else if (order.status.toLowerCase() == "delivered") ...[
+                          Row(
+                            children: [
+                              Expanded(
+                                child: OutlinedButton(
+                                  onPressed: () {
+
+                                    if (reviewed) {
+
+                                      final review = reviewProvider.getReview(item.id);
+
+                                      showModalBottomSheet(
+                                        context: context,
+                                        isScrollControlled: true,
+                                        backgroundColor: Colors.white,
+                                        builder: (_) {
+                                          return ReviewDetailBottomSheet(
+                                            review: review!,
+                                          );
+                                        },
+                                      );
+
+                                    } else {
+
+                                      showModalBottomSheet(
+                                        context: context,
+                                        isScrollControlled: true,
+                                        backgroundColor: Colors.white,
+                                        builder: (_) {
+                                          return ChangeNotifierProvider.value(
+                                            value: context.read<ReviewProvider>(),
+                                            child: ReviewBottomSheet(
+                                              productName: item.name,
+                                              productId: item.product,
+                                              vendorId: item.vendor,
+                                              orderId: order.id,
+                                              orderItemId: item.id,
+                                            ),
+                                          );
+                                        },
+                                      );
+
+                                    }
+
+                                  },
+                                  style: OutlinedButton.styleFrom(
+                                    minimumSize: const Size.fromHeight(50),
+                                    side: const BorderSide(color: Colors.black),
+                                    shape: const RoundedRectangleBorder(),
+                                  ),
+                                  child: Text(
+                                    reviewed ? "View Review" : "Write Review",
+                                    style: const TextStyle(
+                                      color: Colors.black,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                ),
+                              ),
+
+                              const SizedBox(width: 15),
+
+                              Expanded(
+                                child: OutlinedButton(
+                                  onPressed: () {
+                                    // Request Return API
+                                  },
+                                  style: OutlinedButton.styleFrom(
+                                    minimumSize: const Size.fromHeight(50),
+                                    side: const BorderSide(color: Colors.deepOrange),
+                                    shape: const RoundedRectangleBorder(),
+                                  ),
+                                  child: const Text(
+                                    "Request Return",
+                                    style: TextStyle(
+                                      color: Colors.deepOrange,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+
+                          if (order.items.first.isReturnable)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 12),
+                              child: Text(
+                                "Returnable until ${DateTime.parse(order.createdAt).add(const Duration(days: 7)).day}/${DateTime.parse(order.createdAt).add(const Duration(days: 7)).month}/${DateTime.parse(order.createdAt).add(const Duration(days: 7)).year}",
+                                style: const TextStyle(
+                                  color: Colors.green,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ),
+
+                          const SizedBox(height: 15),
+
+                          SizedBox(
+                            width: double.infinity,
+                            height: 50,
+                            child: ElevatedButton(
+                              onPressed: () {
+                                Navigator.pushAndRemoveUntil(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => const HomePage(),
+                                  ),
+                                      (route) => false,
+                                );
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.blue,
+                                shape: const RoundedRectangleBorder(),
+                              ),
+                              child: const Text(
+                                "RETURN HOME",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ]
+
+                        else ...[
+                            SizedBox(
+                              width: double.infinity,
+                              height: 50,
+                              child: ElevatedButton(
+                                onPressed: () {
+                                  Navigator.pushAndRemoveUntil(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => const HomePage(),
+                                    ),
+                                        (route) => false,
+                                  );
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.blue,
+                                  shape: const RoundedRectangleBorder(),
+                                ),
+                                child: const Text(
+                                  "RETURN HOME",
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+
                         const SizedBox(height: 30),
                       ],
                     ),
