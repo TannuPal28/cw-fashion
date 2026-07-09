@@ -53,4 +53,43 @@ class ReviewRemoteDatasource {
         .map((e) => MyReview.fromJson(e))
         .toList();
   }
+
+  Future<MyReviewResponse> getAllReviews({
+    int page = 1,
+  }) async {
+
+    final response = await dioClient.get(
+      "/reviews/my",
+      queryParameters: {
+        "page": page,
+        "limit": 20,
+      },
+    );
+
+    return MyReviewResponse.fromJson(response.data);
+  }
+
+  Future<Review> updateReview({
+    required String reviewId,
+    required ReviewRequest request,
+  }) async {
+    final response = await dioClient.dio.put(
+      "/reviews/$reviewId",
+      data: {
+        "rating": request.rating,
+        "title": request.title,
+        "comment": request.comment,
+        "images": request.images,
+        "videos": request.videos,
+        "isAnonymous": request.isAnonymous,
+      },
+    );
+
+    return ReviewResponse.fromJson(response.data).review;
+  }
+  Future<void> deleteReview(String reviewId) async {
+    await dioClient.dio.delete(
+      "/reviews/$reviewId",
+    );
+  }
 }

@@ -4,17 +4,16 @@ import 'package:cw_fashion/features/my_orders/presentation/bloc/review_provider.
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class ReviewBottomSheet extends StatelessWidget {
+import '../../../cart/data/models/my_review_response.dart';
 
+class ReviewBottomSheet extends StatefulWidget {
   final String productName;
-
   final String productId;
-
   final String vendorId;
-
   final String orderId;
-
   final String orderItemId;
+
+  final MyReview? review;
 
   const ReviewBottomSheet({
     super.key,
@@ -23,8 +22,35 @@ class ReviewBottomSheet extends StatelessWidget {
     required this.vendorId,
     required this.orderId,
     required this.orderItemId,
+    this.review,
   });
 
+  @override
+  State<ReviewBottomSheet> createState() =>
+      _ReviewBottomSheetState();
+}
+
+class _ReviewBottomSheetState
+    extends State<ReviewBottomSheet> {
+
+  @override
+  void initState() {
+    super.initState();
+
+    Future.microtask(() {
+
+      final provider =
+      context.read<ReviewProvider>();
+
+      provider.clear();
+
+      if (widget.review != null) {
+
+        provider.loadReviewForEdit(widget.review!);
+
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -45,7 +71,9 @@ class ReviewBottomSheet extends StatelessWidget {
                 children: [
                   Center(
                     child: Text(
-                      "Write Review",
+                      widget.review == null
+                          ? "Write Review"
+                          : "Edit Review",
                       style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
@@ -54,7 +82,7 @@ class ReviewBottomSheet extends StatelessWidget {
                   ),
                   const SizedBox(height: 25),
                   Text(
-                    productName,
+                    widget.productName,
                     style: const TextStyle(
                       fontWeight: FontWeight.w600,
                       fontSize: 18,
@@ -263,20 +291,20 @@ class ReviewBottomSheet extends StatelessWidget {
                     width: double.infinity,
                     height: 55,
                     child: ElevatedButton(
-                      onPressed: provider.isLoading
+                    /*  onPressed: provider.isLoading
                           ? null
                           : () async {
 
                         final success =
                         await provider.submitReview(
 
-                          productId: productId,
+                          productId: widget.productId,
 
-                          vendorId: vendorId,
+                          vendorId: widget.vendorId,
 
-                          orderId: orderId,
+                          orderId: widget.orderId,
 
-                          orderItemId: orderItemId,
+                          orderItemId: widget.orderItemId,
 
                         );
 
@@ -309,6 +337,72 @@ class ReviewBottomSheet extends StatelessWidget {
                           );
 
                         }
+                      },*/
+                      onPressed: provider.isLoading
+                          ? null
+                          : () async {
+
+                        bool success;
+
+                        if (widget.review == null) {
+
+                          success = await provider.submitReview(
+
+                            productId: widget.productId,
+
+                            vendorId: widget.vendorId,
+
+                            orderId: widget.orderId,
+
+                            orderItemId: widget.orderItemId,
+
+                          );
+
+                        } else {
+
+                          success = await provider.updateReview(
+
+                            reviewId: widget.review!.id,
+
+                          );
+
+                        }
+
+                        if (!mounted) return;
+
+                        if (success) {
+
+                          Navigator.pop(context);
+
+                          ScaffoldMessenger.of(context).showSnackBar(
+
+                            SnackBar(
+
+                              content: Text(
+
+                                widget.review == null
+                                    ? "Review submitted successfully"
+                                    : "Review updated successfully",
+
+                              ),
+
+                            ),
+
+                          );
+
+                        } else {
+
+                          ScaffoldMessenger.of(context).showSnackBar(
+
+                            const SnackBar(
+
+                              content: Text("Something went wrong"),
+
+                            ),
+
+                          );
+
+                        }
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.black,
@@ -318,13 +412,23 @@ class ReviewBottomSheet extends StatelessWidget {
                           ? const CircularProgressIndicator(
                         color: Colors.white,
                       )
-                          : const Text(
-                        "SUBMIT REVIEW",
-                        style: TextStyle(
+                          : Text(
+
+                        widget.review == null
+
+                            ? "SUBMIT REVIEW"
+
+                            : "UPDATE REVIEW",
+
+                        style: const TextStyle(
+
                           color: Colors.white,
+
                           fontSize: 16,
+
                         ),
-                      ),
+
+                      )
                     ),
                   ),
                 ],

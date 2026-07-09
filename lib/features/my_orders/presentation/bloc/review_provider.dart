@@ -27,6 +27,16 @@ class ReviewProvider extends ChangeNotifier {
   List<UploadedFile> uploadedImages = [];
   List<UploadedFile> uploadedVideos = [];
 
+  List<MyReview> reviews = [];
+
+  bool loading = false;
+  bool loadMoreLoading = false;
+
+  int currentPage = 1;
+  int totalPages = 1;
+
+  bool hasMore = true;
+
   void setRating(double value) {
     rating = value;
     notifyListeners();
@@ -184,6 +194,169 @@ class ReviewProvider extends ChangeNotifier {
       );
     } catch (_) {
       return null;
+    }
+  }
+
+  Future<void> getAllReviews() async {
+    loading = true;
+
+    currentPage = 1;
+    hasMore = true;
+
+    notifyListeners();
+
+    try {
+      final response =
+      await reviewRepository.getAllReviews(page: currentPage);
+
+      reviews = response.reviews;
+
+      print("reviews length = ${reviews.length}");
+
+      totalPages = response.pagination.totalPages;
+
+      hasMore = currentPage < totalPages;
+    } finally {
+      loading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> loadMoreReviews() async {
+    if (loadMoreLoading || !hasMore) return;
+
+    loadMoreLoading = true;
+    notifyListeners();
+
+    try {
+      currentPage++;
+
+      final response =
+      await reviewRepository.getAllReviews(page: currentPage);
+
+      reviews.addAll(response.reviews);
+
+      totalPages = response.pagination.totalPages;
+
+      hasMore = currentPage < totalPages;
+    } finally {
+      loadMoreLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> refreshReviews() async {
+    currentPage = 1;
+    hasMore = true;
+
+    await getAllReviews();
+  }
+
+  void loadReviewForEdit(MyReview review) {
+    clear();
+
+    rating = review.rating.toDouble();
+
+    titleController.text = review.title;
+
+    commentController.text = review.comment;
+
+    anonymous = review.isAnonymous;
+
+    uploadedImages = review.images
+        .map(
+          (e) => UploadedFile(
+        url: e,
+        publicId: "",
+        originalName: "",
+        size: 0,
+        mimeType: "",
+      ),
+    )
+        .toList();
+
+    uploadedVideos = review.videos
+        .map(
+          (e) => UploadedFile(
+        url: e,
+        publicId: "",
+        originalName: "",
+        size: 0,
+        mimeType: "",
+      ),
+    )
+        .toList();
+
+    notifyListeners();
+  }
+
+  Future<bool> updateReview({
+    required String reviewId,
+  }) async {
+    if (titleController.text.trim().isEmpty) return false;
+
+    if (commentController.text.trim().isEmpty) return false;
+
+    isLoading = true;
+    notifyListeners();
+
+    try {
+      await reviewRepository.updateReview(
+        reviewId: reviewId,
+        request: ReviewRequest(
+          productId: "",
+          vendorId: "",
+          orderId: "",
+          orderItemId: "",
+          rating: rating.toInt(),
+          title: titleController.text.trim(),
+          comment: commentController.text.trim(),
+          images: uploadedImages.map((e) => e.url).toList(),
+          videos: uploadedVideos.map((e) => e.url).toList(),
+          isAnonymous: anonymous,
+        ),
+      );
+
+      await getAllReviews();
+
+      clear();
+
+      return true;
+    } catch (e) {
+      return false;
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  void removeUploadedImage(int index) {
+    uploadedImages.removeAt(index);
+    notifyListeners();
+  }
+
+  void removeUploadedVideo(int index) {
+    uploadedVideos.removeAt(index);
+    notifyListeners();
+  }
+
+  Future<bool> deleteReview(String reviewId) async {
+    isLoading = true;
+    notifyListeners();
+
+    try {
+      await reviewRepository.deleteReview(reviewId);
+
+      reviews.removeWhere((e) => e.id == reviewId);
+
+      notifyListeners();
+
+      return true;
+    } catch (e) {
+      return false;
+    } finally {
+      isLoading = false;
+      notifyListeners();
     }
   }
 }

@@ -65,7 +65,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                         const Text(
                           "Order Details",
                           style: TextStyle(
-                            fontSize: 34,
+                            fontSize: 30,
                             fontWeight: FontWeight.bold,
                             fontFamily: "Times New Roman",
                           ),
@@ -132,7 +132,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
 
                               const SizedBox(height: 20),
 
-                              /*SizedBox(
+                              SizedBox(
                                 height: 48,
                                 child: OutlinedButton.icon(
                                   onPressed: () {
@@ -150,7 +150,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                                     style: TextStyle(color: Colors.black),
                                   ),
                                 ),
-                              ),*/
+                              ),
                             ],
                           ),
                         ),

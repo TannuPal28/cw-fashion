@@ -25,4 +25,23 @@ class ReviewRepository {
   Future<List<MyReview>> getMyReviews(String orderId) {
     return remoteDatasource.getMyReviews(orderId);
   }
+
+  Future<MyReviewResponse> getAllReviews({
+    int page = 1,
+  }) {
+    return remoteDatasource.getAllReviews(page: page);
+  }
+
+  Future<Review> updateReview({
+    required String reviewId,
+    required ReviewRequest request,
+  }) {
+    return remoteDatasource.updateReview(
+      reviewId: reviewId,
+      request: request,
+    );
+  }
+  Future<void> deleteReview(String reviewId) {
+    return remoteDatasource.deleteReview(reviewId);
+  }
 }

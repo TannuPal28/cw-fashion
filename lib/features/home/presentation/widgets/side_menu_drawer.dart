@@ -2,10 +2,10 @@ import 'package:cw_fashion/features/all_products/presentation/pages/all_products
 import 'package:cw_fashion/features/cart/presentation/pages/cart_page.dart';
 import 'package:cw_fashion/features/home/presentation/pages/home_page.dart';
 import 'package:cw_fashion/features/my_orders/presentation/pages/my_orders_page.dart';
+import 'package:cw_fashion/features/my_orders/presentation/pages/my_reviews_pages.dart';
 import 'package:cw_fashion/features/profile/presentation/pages/profile_page.dart';
 import 'package:cw_fashion/features/wallet/presentation/pages/wallet_page.dart';
 import 'package:cw_fashion/features/wishlist/presentation/pages/wishlist_page.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/utils/auth_manager.dart';
@@ -174,7 +174,15 @@ class _SideMenuDrawerState extends State<SideMenuDrawer> {
                             );
                           }),
 
-                          menuItem("My Reviews", () {}),
+                          menuItem("My Reviews", () {
+                            Navigator.pop(context);
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const MyReviewsPage(),
+                              ),
+                            );
+                          }),
 
                           menuItem("Wallet", () {
                             Navigator.pop(context);
