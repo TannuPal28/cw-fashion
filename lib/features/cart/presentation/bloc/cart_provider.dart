@@ -36,6 +36,16 @@ class CartProvider extends ChangeNotifier {
       }
     }
   }
+  int get cartCount {
+
+    int total = 0;
+
+    for (final item in items) {
+      total += item.quantity;
+    }
+
+    return total;
+  }
 
   Future<void> increaseQty(CartItem item) async {
     final index = items.indexWhere((e) => e.id == item.id);

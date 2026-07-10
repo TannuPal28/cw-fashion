@@ -1,3 +1,4 @@
+import 'package:cw_fashion/features/all_products/presentation/pages/product_detail_page.dart';
 import 'package:cw_fashion/features/home/presentation/widgets/custom_header.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
@@ -214,48 +215,47 @@ class _AllProductsPageState extends State<AllProductsPage> {
   Widget _products(SearchProvider provider) {
     return GridView.builder(
       shrinkWrap: true,
-
       physics: const NeverScrollableScrollPhysics(),
-
       itemCount: provider.products.length,
-
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
-
         crossAxisSpacing: 16,
-
         mainAxisSpacing: 20,
-
         childAspectRatio: .47,
       ),
-
       itemBuilder: (_, index) {
         final product = provider.products[index];
 
         int discount = 0;
 
         if (product.mrp > 0) {
-          discount =
-              (((product.mrp - product.flashSalePrice) / product.mrp) * 100)
-                  .round();
+          discount = (((product.mrp - product.flashSalePrice) / product.mrp) * 100)
+              .round();
         }
 
-        return ProductCard(
-          image: product.images.isNotEmpty ? product.images.first.url : "",
-
-          title: product.title,
-
-          price: "₹${product.flashSalePrice}",
-
-          oldPrice: "₹${product.mrp}",
-
-          rating: product.rating,
-
-          reviews: product.numRatings,
-
-          sold: "${product.totalSold}+ sold",
-
-          discount: "-$discount%",
+        return InkWell(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => ProductDetailPage(
+                  productId: product.id,
+                ),
+              ),
+            );
+          },
+          child: ProductCard(
+            image: product.images.isNotEmpty
+                ? product.images.first.url
+                : "",
+            title: product.title,
+            price: "₹${product.flashSalePrice}",
+            oldPrice: "₹${product.mrp}",
+            rating: product.rating,
+            reviews: product.numRatings,
+            sold: "${product.totalSold}+ sold",
+            discount: "-$discount%",
+          ),
         );
       },
     );

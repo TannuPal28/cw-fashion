@@ -3,6 +3,8 @@ import 'package:cw_fashion/features/home/presentation/widgets/category_card.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../all_products/presentation/pages/all_products_page.dart';
+
 class CategorySection extends StatelessWidget {
   const CategorySection({super.key});
 
@@ -38,9 +40,22 @@ class CategorySection extends StatelessWidget {
                   itemBuilder: (_, index) {
                     final category = provider.category[index];
 
-                    return CategoryCard(
-                      title: category.name,
-                      imageUrl: category.imageUrl,
+                    return GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) =>
+                                  AllProductsPage(
+                                    query: category.name,
+                                  ),
+                            ),
+                          );
+                        },
+                        child: CategoryCard(
+                          title: category.name,
+                          imageUrl: category.imageUrl,
+                        ),
                     );
                   },
                   itemCount: provider.category.length,

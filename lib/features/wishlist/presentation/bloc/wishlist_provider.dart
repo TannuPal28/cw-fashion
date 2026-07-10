@@ -12,6 +12,7 @@ class WishlistProvider extends ChangeNotifier {
   bool loading = false;
 
   List<WishlistProduct> wishlist = [];
+  int get wishlistCount => wishlist.length;
 
   Future<void> getWishlist() async {
 
@@ -21,6 +22,7 @@ class WishlistProvider extends ChangeNotifier {
     final response = await repository.getWishlist();
 
     wishlist = response.wishlist;
+
 
     loading = false;
 

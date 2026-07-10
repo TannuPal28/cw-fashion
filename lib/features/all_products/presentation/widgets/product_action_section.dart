@@ -2,6 +2,9 @@ import 'package:cw_fashion/features/all_products/presentation/bloc/product_detai
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../cart/presentation/bloc/cart_provider.dart';
+import '../../../wishlist/presentation/bloc/wishlist_provider.dart';
+
 class ProductActionSection extends StatefulWidget {
   final String productId;
 
@@ -94,6 +97,10 @@ class _ProductActionSectionState extends State<ProductActionSection> {
                         if (!context.mounted) return;
 
                         if (success) {
+                          await context.read<CartProvider>().getCart(showLoader: false);
+
+                          if (!context.mounted) return;
+
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(content: Text("Added to cart")),
                           );
@@ -132,11 +139,15 @@ class _ProductActionSectionState extends State<ProductActionSection> {
           GestureDetector(
             onTap: provider.wishlistLoading
                 ? null
-                : () {
-                    context.read<ProductDetailProvider>().toggleWishlist(
-                      widget.productId,
-                    );
-                  },
+                : () async {
+              await context.read<ProductDetailProvider>().toggleWishlist(
+                widget.productId,
+              );
+
+              if (!context.mounted) return;
+
+              await context.read<WishlistProvider>().getWishlist();
+            },
             child: Container(
               width: 40,
               height: 50,

@@ -4,9 +4,12 @@ import 'package:cw_fashion/features/home/presentation/widgets/side_menu_drawer.d
 import 'package:cw_fashion/features/wishlist/presentation/pages/wishlist_page.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../../../core/utils/auth_manager.dart';
 import '../../../all_products/presentation/pages/all_products_page.dart';
+import '../../../cart/presentation/bloc/cart_provider.dart';
+import '../../../wishlist/presentation/bloc/wishlist_provider.dart';
 
 class CustomHeader extends StatefulWidget {
   const CustomHeader({super.key});
@@ -30,6 +33,7 @@ class _CustomHeaderState extends State<CustomHeader> {
   void initState() {
     super.initState();
     loadToken();
+
   }
 
   Future<void> loadToken() async {
@@ -114,42 +118,74 @@ class _CustomHeaderState extends State<CustomHeader> {
 
           const SizedBox(width: 15),
 
-          GestureDetector(
-            onTap: () async {
-              if (!isLoggedIn) {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const SignInPage()),
-                );
-                return;
-              }
+          Consumer<WishlistProvider>(
+            builder: (_, wishlistProvider, __) {
 
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const WishlistPage()),
+              return buildBadge(
+
+                count: wishlistProvider.wishlistCount,
+
+                child: const Icon(Icons.favorite_border),
+
+                onTap: () async {
+
+                  if (!isLoggedIn) {
+
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const SignInPage(),
+                      ),
+                    );
+
+                    return;
+                  }
+
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const WishlistPage(),
+                    ),
+                  );
+                },
               );
             },
-            child: const Icon(Icons.favorite_border),
           ),
 
           const SizedBox(width: 15),
 
-          GestureDetector(
-            onTap: () async {
-              if (!isLoggedIn) {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const SignInPage()),
-                );
-                return;
-              }
+          Consumer<CartProvider>(
+            builder: (_, cartProvider, __) {
 
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const CartPage()),
+              return buildBadge(
+
+                count: cartProvider.cartCount,
+
+                child: const Icon(Icons.shopping_bag_outlined),
+
+                onTap: () async {
+
+                  if (!isLoggedIn) {
+
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const SignInPage(),
+                      ),
+                    );
+
+                    return;
+                  }
+
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const CartPage(),
+                    ),
+                  );
+                },
               );
             },
-            child: const Icon(Icons.shopping_bag_outlined),
           ),
 
           const SizedBox(width: 15),
@@ -228,6 +264,48 @@ class _CustomHeaderState extends State<CustomHeader> {
               style: TextStyle(color: Colors.grey, fontSize: 18),
             ),
           ),
+        ],
+      ),
+    );
+  }
+  Widget buildBadge({
+    required Widget child,
+    required int count,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+
+          child,
+
+          if (count > 0)
+            Positioned(
+              right: -8,
+              top: -8,
+              child: Container(
+                padding: const EdgeInsets.all(4),
+                constraints: const BoxConstraints(
+                  minWidth: 18,
+                  minHeight: 18,
+                ),
+                decoration: const BoxDecoration(
+                  color: Colors.red,
+                  shape: BoxShape.circle,
+                ),
+                child: Text(
+                  "$count",
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
         ],
       ),
     );
